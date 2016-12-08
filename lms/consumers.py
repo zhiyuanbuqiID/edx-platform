@@ -10,19 +10,34 @@ from courseware.module_render import xblock_view_msg
 def http_consumer(message):
     # Make standard HTTP response - access ASGI path attribute directly
     response = HttpResponse("Hello world! You asked for %s" % message.content['path'])
+
+    message.session = message.http_session
+
     # Encode that response into message format (ASGI)
     for chunk in AsgiHandler.encode_response(response):
         message.reply_channel.send(chunk)
 
-@http_session_user
+@channel_session_user
 def ws_message(message):
     # ASGI WebSocket packet-received and send-packet message types
     # both have a "text" key for their textual data.
     usage_ids = json.loads(message.content['text'])
 
-    print dir(message)
-    print message
+    message.session = message.channel_session
+    print "user as message time {}".format(message.user)
+    print "session at message time {}".format(message.session)
 
     # Step #1: Do it all here.
     for usage_id in usage_ids:
         xblock_view_msg(message, usage_id)
+
+@channel_session_user_from_http
+def ws_connect(message):
+    message.session = message.http_session
+    print "Connect called"
+    print "user at connect {}".format(message.user)
+    print "session at connect {}".format(message.session)
+
+@channel_session_user
+def ws_disconnect(message):
+    print "Disconnect called"

@@ -66,6 +66,7 @@
 
 <script type="text/javascript">
   var sequenceNav;
+  var usageKeysToFragments = {};
   $(document).ready(function() {
     sequenceNav = new SequenceNav($('.sequence-nav'));
 
@@ -75,7 +76,9 @@
     // connection gets bumped over to WebSocket consumers
     socket = new WebSocket("ws://" + window.location.host + "/xblock/fragments");
     socket.onmessage = function(e) {
-        console.log(e.data);
+        fragment = JSON.parse(e.data);
+        usageKeysToFragments[fragment['id']] = fragment;
+        console.log(fragment);
     }
     socket.onopen = function() {
         socket.send(JSON.stringify(usageKeysToRequest));

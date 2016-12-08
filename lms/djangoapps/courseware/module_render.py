@@ -1036,8 +1036,8 @@ def _xblock_view(request, course_id, usage_id, view_name):
                  " see FEATURES['ENABLE_XBLOCK_VIEW_ENDPOINT']")
         raise Http404
 
-    #if not request.user.is_authenticated():
-    #    raise PermissionDenied
+    if not request.user.is_authenticated():
+        raise PermissionDenied
 
     try:
         course_key = SlashSeparatedCourseKey.from_deprecated_string(course_id)
@@ -1085,9 +1085,15 @@ def xblock_view_msg(message, usage_id):
         message.is_secure = lambda: False
 
         fragment_dict = _xblock_view(message, unicode(course_key), usage_id, "student_view")
+
+        # A little post-processing
+        fragment_dict['id'] = unicode(usage_key)
+        fragment_dict['html'] = fragment_dict['html'].strip()
+        fragment_dict['error'] = None
     except Exception as err:
         log.exception("Error while trying to execute xblock_view_msg.")
         fragment_dict = {
+            'id': None,
             'html': '',
             'resources': [],
             'error': err.message
