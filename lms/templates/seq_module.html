@@ -1,7 +1,6 @@
 <%page expression_filter="h"/>
 <%! from django.utils.translation import ugettext as _ %>
-
-<div id="sequence_${element_id}" class="sequence" data-id="${item_id}" data-position="${position}" data-ajax-url="${ajax_url}" data-next-url="${next_url}" data-prev-url="${prev_url}">
+<div id="sequence_${element_id}" class="sequence" data-id="${item_id}" data-position="${position}" data-ajax-url="${ajax_url}" data-next-url="${next_url}" data-prev-url="${prev_url}" data-usage-keys="${usage_keys}">
   % if banner_text:
     <div class="pattern-library-shim alert alert-information subsection-header" tabindex="-1">
       <span class="pattern-library-shim icon alert-icon fa fa-bullhorn" aria-hidden="true"></span>
@@ -69,5 +68,19 @@
   var sequenceNav;
   $(document).ready(function() {
     sequenceNav = new SequenceNav($('.sequence-nav'));
+
+    var usageKeysToRequest = $(".sequence")[0].attributes["data-usage-keys"].value.split(" ");
+
+    // Note that the path doesn't matter for routing; any WebSocket
+    // connection gets bumped over to WebSocket consumers
+    socket = new WebSocket("ws://" + window.location.host + "/xblock/fragments");
+    socket.onmessage = function(e) {
+        console.log(e.data);
+    }
+    socket.onopen = function() {
+        socket.send(JSON.stringify(usageKeysToRequest));
+    }
+    // Call onopen directly if socket is already open
+    if (socket.readyState == WebSocket.OPEN) socket.onopen();
   });
 </script>

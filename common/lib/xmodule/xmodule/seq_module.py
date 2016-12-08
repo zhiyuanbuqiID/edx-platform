@@ -302,6 +302,10 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
 
         fragment = Fragment()
         params = {
+            'usage_keys': u" ".join(
+                unicode(loc) for loc in reversed(self._locations_in_subtree(self))
+                if loc.block_type not in ['sequential', 'vertical']
+            ),
             'items': self._render_student_view_for_items(context, display_items, fragment),
             'element_id': self.location.html_id(),
             'item_id': self.location.to_deprecated_string(),
@@ -313,6 +317,9 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
             'banner_text': banner_text,
         }
         fragment.add_content(self.system.render_template("seq_module.html", params))
+        # fragment.add_javascript_url(
+        #     self.runtime.local_resource_url(self, 'public/js/seq_websockets.js')
+        # )
 
         self._capture_full_seq_item_metrics(display_items)
         self._capture_current_unit_metrics(display_items)

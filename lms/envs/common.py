@@ -2145,7 +2145,20 @@ INSTALLED_APPS = (
 
     # additional release utilities to ease automation
     'release_util',
+
+    # Django Channels
+    'channels',
 )
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "asgi_ipc.IPCChannelLayer",
+        "ROUTING": "lms.routing.channel_routing",
+        "CONFIG": {
+            "prefix": "lms",
+        },
+    },
+}
 
 # Migrations which are not in the standard module "migrations"
 MIGRATION_MODULES = {

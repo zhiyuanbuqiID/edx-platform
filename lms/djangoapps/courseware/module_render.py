@@ -340,11 +340,13 @@ def get_xqueue_callback_url_prefix(request):
     by the LMS before submitting background tasks to run.  The xqueue callbacks
     should go back to the LMS, not to the worker.
     """
-    prefix = '{proto}://{host}'.format(
-        proto=request.META.get('HTTP_X_FORWARDED_PROTO', 'https' if request.is_secure() else 'http'),
-        host=request.get_host()
-    )
-    return settings.XQUEUE_INTERFACE.get('callback_url', prefix)
+    return 'http://localhost:8000/I_Hate_XQueue_May_It_Burn'
+
+    # prefix = '{proto}://{host}'.format(
+    #     proto=request.META.get('HTTP_X_FORWARDED_PROTO', 'https' if request.is_secure() else 'http'),
+    #     host=request.get_host()
+    # )
+    # return settings.XQUEUE_INTERFACE.get('callback_url', prefix)
 
 
 def get_module_for_descriptor(user, request, descriptor, field_data_cache, course_key,
@@ -1020,7 +1022,7 @@ def hash_resource(resource):
     return md5.hexdigest()
 
 
-def xblock_view(request, course_id, usage_id, view_name):
+def _xblock_view(request, course_id, usage_id, view_name):
     """
     Returns the rendered view of a given XBlock, with related resources
 
@@ -1034,8 +1036,8 @@ def xblock_view(request, course_id, usage_id, view_name):
                  " see FEATURES['ENABLE_XBLOCK_VIEW_ENDPOINT']")
         raise Http404
 
-    if not request.user.is_authenticated():
-        raise PermissionDenied
+    #if not request.user.is_authenticated():
+    #    raise PermissionDenied
 
     try:
         course_key = SlashSeparatedCourseKey.from_deprecated_string(course_id)
@@ -1056,11 +1058,43 @@ def xblock_view(request, course_id, usage_id, view_name):
         for resource in fragment.resources:
             hashed_resources[hash_resource(resource)] = resource
 
-        return JsonResponse({
+        return {
             'html': fragment.content,
             'resources': hashed_resources.items(),
             'csrf_token': unicode(csrf(request)['csrf_token']),
-        })
+        }
+
+
+def xblock_view(request, course_id, usage_id, view_name):
+    fragment_dict = _xblock_view(request, course_id, usage_id, view_name)
+    return JsonResponse(fragment_dict)
+
+from opaque_keys.edx.keys import UsageKey
+import json
+
+def xblock_view_msg(message, usage_id):
+    request = {}
+    try:
+        usage_key = UsageKey.from_string(usage_id)
+        course_key = usage_key.course_key  # Yeah, only works on SplitMS
+
+        # Fake a Request object because rendering demands it be there.
+        # This is a horrible hack.
+        message.META = {}
+        message.GET = {}
+        message.is_secure = lambda: False
+
+        fragment_dict = _xblock_view(message, unicode(course_key), usage_id, "student_view")
+    except Exception as err:
+        log.exception("Error while trying to execute xblock_view_msg.")
+        fragment_dict = {
+            'html': '',
+            'resources': [],
+            'error': err.message
+        }
+    message.reply_channel.send({
+        "text": json.dumps(fragment_dict)
+    })
 
 
 def _check_files_limits(files):
