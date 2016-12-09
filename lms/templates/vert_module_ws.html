@@ -1,0 +1,17 @@
+<%page expression_filter="h"/>
+<%! from openedx.core.djangolib.markup import HTML %>
+%if unit_title:
+  <h3 class="unit-title">${unit_title}</h3>
+% endif
+
+% if show_bookmark_button:
+    <%include file='bookmark_button.html' args="bookmark_id=bookmark_id, is_bookmarked=bookmarked"/>
+% endif
+
+<div class="vert-mod">
+% for usage_key in usage_keys:
+  <div id="vert__${usage_key}" class="vert" data-id="${usage_key}">
+    Loading ${usage_key}...
+  </div>
+% endfor
+</div>

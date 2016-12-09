@@ -217,7 +217,7 @@ class SequenceModule(SequenceFields, ProctoringFields, XModule):
 
     def student_view(self, context):
         context = context or {}
-        self._capture_basic_metrics()
+        # self._capture_basic_metrics()
         banner_text = None
         special_html_view = self._hidden_content_student_view(context) or self._special_exam_student_view()
         if special_html_view:

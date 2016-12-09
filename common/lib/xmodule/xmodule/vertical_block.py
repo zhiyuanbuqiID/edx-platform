@@ -55,24 +55,35 @@ class VerticalBlock(SequenceFields, XModuleFields, StudioEditableBlock, XmlParse
         is_child_of_vertical = context.get('child_of_vertical', False)
 
         # pylint: disable=no-member
-        for child in self.get_display_items():
-            rendered_child = child.render(STUDENT_VIEW, child_context)
-            fragment.add_frag_resources(rendered_child)
+        # for child in self.get_display_items():
+            # rendered_child = child.render(STUDENT_VIEW, child_context)
+            # fragment.add_frag_resources(rendered_child)
+            # contents.append({
+            #     'id': child.location.to_deprecated_string(),
+            #     'content': rendered_child.content
+            # })
 
-            contents.append({
-                'id': child.location.to_deprecated_string(),
-                'content': rendered_child.content
-            })
+        # fragment.add_content(self.system.render_template('vert_module.html', {
+        #     'items': contents,
+        #     'xblock_context': context,
+        #     'unit_title': self.display_name_with_default if not is_child_of_vertical else None,
+        #     'show_bookmark_button': not is_child_of_vertical,
+        #     'bookmarked': child_context['bookmarked'],
+        #     'bookmark_id': u"{},{}".format(child_context['username'], unicode(self.location))
+        # }))
+        #
+        # fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vertical_student_view.js'))
+        # fragment.initialize_js('VerticalStudentView')
 
-        fragment.add_content(self.system.render_template('vert_module.html', {
-            'items': contents,
-            'xblock_context': context,
-            'unit_title': self.display_name_with_default if not is_child_of_vertical else None,
-            'show_bookmark_button': not is_child_of_vertical,
-            'bookmarked': child_context['bookmarked'],
-            'bookmark_id': u"{},{}".format(child_context['username'], unicode(self.location))
+        usage_keys = [child.location for child in self.get_display_items()]
+        fragment.add_content(self.system.render_template('vert_module_ws.html', {
+             'usage_keys': usage_keys,
+             'xblock_context': context,
+             'unit_title': self.display_name_with_default if not is_child_of_vertical else None,
+             'show_bookmark_button': not is_child_of_vertical,
+             'bookmarked': child_context['bookmarked'],
+             'bookmark_id': u"{},{}".format(child_context['username'], unicode(self.location))
         }))
-
         fragment.add_javascript_url(self.runtime.local_resource_url(self, 'public/js/vertical_student_view.js'))
         fragment.initialize_js('VerticalStudentView')
 

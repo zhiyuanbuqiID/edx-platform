@@ -42,14 +42,16 @@
 
   <div class="sr-is-focusable" tabindex="-1"></div>
 
-  % for idx, item in enumerate(items):
-  <div id="seq_contents_${idx}"
-    aria-labelledby="tab_${idx}"
-    aria-hidden="true"
-    class="seq_contents tex2jax_ignore asciimath2jax_ignore">
-    ${item['content']}
-  </div>
-  % endfor
+% for idx, item in enumerate(items):
+<div id="seq_contents_${idx}"
+  aria-labelledby="tab_${idx}"
+  aria-hidden="true"
+  class="seq_contents tex2jax_ignore asciimath2jax_ignore">
+  ${item['content']}
+</div>
+% endfor
+
+
   <div id="seq_content"></div>
 
   <nav class="sequence-bottom" aria-label="${_('Section')}">
@@ -78,6 +80,8 @@
     socket.onmessage = function(e) {
         fragment = JSON.parse(e.data);
         usageKeysToFragments[fragment['id']] = fragment;
+        var destinationDiv = $(document.getElementById("vert__" + fragment['id']));
+        XBlock.renderXBlockFragment(fragment, destinationDiv);
         console.log(fragment);
     }
     socket.onopen = function() {
