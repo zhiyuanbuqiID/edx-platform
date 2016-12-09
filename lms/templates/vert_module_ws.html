@@ -9,9 +9,9 @@
 % endif
 
 <div class="vert-mod">
-% for usage_key in usage_keys:
-  <div id="vert__${usage_key}" class="vert" data-id="${usage_key}">
-    Loading ${usage_key}...
+% for idx, usage_key in enumerate(usage_keys):
+  <div id="vert__${usage_key}" class="vert vert-${idx}" data-id="${usage_key}">
+    <p>Loading ${usage_key}...</p>
   </div>
 % endfor
 </div>

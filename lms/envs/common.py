@@ -2152,11 +2152,12 @@ INSTALLED_APPS = (
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgi_ipc.IPCChannelLayer",
+        "BACKEND": "asgiref.inmemory.ChannelLayer",  # This is faster for dev
         "ROUTING": "lms.routing.channel_routing",
-        "CONFIG": {
-            "prefix": "lms",
-        },
+#        "BACKEND": "asgi_ipc.IPCChannelLayer",
+#        "CONFIG": {
+#            "prefix": "lms",
+#        },
     },
 }
 
