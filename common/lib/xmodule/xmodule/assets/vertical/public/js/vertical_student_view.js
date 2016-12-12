@@ -13,4 +13,10 @@ window.VerticalStudentView = function(runtime, element) {
             apiUrl: $('.courseware-bookmarks-button').data('bookmarksApiUrl')
         });
     });
+
+    for (var key in usageKeysToFragments) {
+        fragment = usageKeysToFragments[key];
+        var destinationDiv = $(document.getElementById("vert__" + fragment['id']));
+        XBlock.renderXBlockFragment(fragment, destinationDiv);
+    }
 };
