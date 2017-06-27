@@ -484,18 +484,13 @@ class ContentGroupVisibilityModalTest(BaseGroupConfigurationsTest):
         Scenario: The component visibility modal can be set to be visible to all students and staff.
             Given I have a unit with one component
             When I go to the container page for that unit
-            And I open the visibility editor modal for that unit's component
-            And I select 'Dogs'
-            And I save the modal
-            Then the container page should display the content visibility warning
-            And I re-open the visibility editor modal for that unit's component
+            Then the container page should not display the content visibility warning by default
+            And if I open the visibility editor modal for that unit's component
             And I select 'All Students and Staff'
             And I save the modal
             Then the visibility selection should be 'All Students and Staff'
-            And the container page should not display the content visibility warning
+            And the container page should still not display the content visibility warning
         """
-        self.select_and_verify_saved(self.html_component, self.CONTENT_GROUP_PARTITION, ['Dogs'])
-        self.verify_visibility_set(self.html_component, True)
         self.select_and_verify_saved(self.html_component, self.ALL_LEARNERS_AND_STAFF)
         self.verify_visibility_set(self.html_component, False)
 
@@ -508,10 +503,8 @@ class ContentGroupVisibilityModalTest(BaseGroupConfigurationsTest):
             And I select 'Dogs'
             And I save the modal
             Then the visibility selection should be 'Dogs' and 'Specific Content Groups'
-            And the container page should display the content visibility warning
         """
         self.select_and_verify_saved(self.html_component, self.CONTENT_GROUP_PARTITION, ['Dogs'])
-        self.verify_visibility_set(self.html_component, True)
 
     def test_select_multiple_content_groups(self):
         """
@@ -522,10 +515,8 @@ class ContentGroupVisibilityModalTest(BaseGroupConfigurationsTest):
             And I select 'Dogs' and 'Cats'
             And I save the modal
             Then the visibility selection should be 'Dogs', 'Cats', and 'Specific Content Groups'
-            And the container page should display the content visibility warning
         """
         self.select_and_verify_saved(self.html_component, self.CONTENT_GROUP_PARTITION, ['Dogs', 'Cats'])
-        self.verify_visibility_set(self.html_component, True)
 
     def test_select_zero_content_groups(self):
         """
@@ -581,12 +572,10 @@ class ContentGroupVisibilityModalTest(BaseGroupConfigurationsTest):
             Then I should see a validation error message on that unit's component
             And I open the visibility editor modal for that unit's component
             Then I should see that I have selected multiple deleted groups
-            And the container page should display the content visibility warning
-            And I de-select the missing groups
+            And then if I de-select the missing groups
             And I save the modal
             Then the visibility selection should be the names of the valid groups.
             And I should not see any validation errors on the component
-            And the container page should display the content visibility warning
         """
         self.update_component(
             self.html_component,
@@ -603,7 +592,6 @@ class ContentGroupVisibilityModalTest(BaseGroupConfigurationsTest):
         expected_groups = ['Dogs', 'Cats']
         self.verify_current_groups_message(visibility_editor, ", ".join(expected_groups))
         self.verify_selected_groups(visibility_editor, expected_groups)
-        self.verify_visibility_set(self.html_component, True)
 
     def _verify_and_remove_missing_content_groups(self, current_groups_message, all_group_labels):
         self.verify_component_validation_error(self.html_component)
