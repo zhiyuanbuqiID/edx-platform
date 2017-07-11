@@ -523,3 +523,27 @@ def get_current_child(xmodule, min_depth=None, requested_child=None):
                 child = _get_default_child_module(children)
 
     return child
+
+
+def check_user_courseware_access(course, user):
+    """
+    On a courseware page, if the user does not have access due to the start date.
+    """
+    access_response = has_access(user, 'load', course, course.id)
+
+    if not access_response:
+
+        # The user doesn't have access to the course. If they're
+        # denied permission due to the course not being live yet,
+        # redirect to the dashboard page.
+        if isinstance(access_response, StartDateError):
+            start_date = strftime_localized(course.start, 'SHORT_DATE')
+            params = QueryDict(mutable=True)
+            params['notlive'] = start_date
+            return redirect('{dashboard_url}?{params}'.format(
+                dashboard_url=reverse('dashboard'),
+                params=params.urlencode()
+            ))
+        # Otherwise, give a 404 to avoid leaking info about access
+        # control.
+        raise Http404("Course not found.")
