@@ -20,6 +20,8 @@ from student.tests.factories import CourseEnrollmentFactory, UserFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
 
+from lms.djangoapps.instructor.views.api import add_certificate_exception
+
 
 class SelfGeneratedCertsSignalTest(ModuleStoreTestCase):
     """
@@ -72,17 +74,19 @@ class WhitelistGeneratedCertificatesTest(ModuleStoreTestCase):
             'lms.djangoapps.certificates.signals.generate_certificate.apply_async',
             return_value=None
         ) as mock_generate_certificate_apply_async:
-            with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=False):
-                CertificateWhitelist.objects.create(
-                    user=self.user,
-                    course_id=self.course.id
-                )
-                mock_generate_certificate_apply_async.assert_not_called()
+            # with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=False):
+                # add_certificate_exception(course_key=self.course.id, student=self.user, certificate_exception={})
+                # CertificateWhitelist.objects.create(
+                #     user=self.user,
+                #     course_id=self.course.id
+                # )
+                # mock_generate_certificate_apply_async.assert_not_called()
             with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=True):
-                CertificateWhitelist.objects.create(
-                    user=self.user,
-                    course_id=self.course.id
-                )
+                add_certificate_exception(course_key=self.course.id, student=self.user, certificate_exception={})
+                # CertificateWhitelist.objects.create(
+                #     user=self.user,
+                #     course_id=self.course.id
+                # )
                 mock_generate_certificate_apply_async.assert_called_with(
                     student=self.user,
                     course_key=self.course.id,
