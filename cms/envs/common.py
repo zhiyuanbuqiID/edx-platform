@@ -311,10 +311,6 @@ TEMPLATES = [
         'DIRS': MAKO_TEMPLATES['main'],
         # Options specific to this backend.
         'OPTIONS': {
-            'loaders': (
-                'django.template.loaders.filesystem.Loader',
-                'django.template.loaders.app_directories.Loader',
-            ),
             'context_processors': (
                 'django.template.context_processors.request',
                 'django.template.context_processors.static',
