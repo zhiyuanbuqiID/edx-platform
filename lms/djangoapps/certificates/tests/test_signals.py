@@ -14,13 +14,12 @@ from certificates.models import \
 from certificates.signals import _listen_for_course_pacing_changed
 from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
 from lms.djangoapps.grades.tests.utils import mock_passing_grade
+from lms.djangoapps.instructor.views.api import add_certificate_exception, remove_certificate_exception
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification
 from openedx.core.djangoapps.self_paced.models import SelfPacedConfiguration
 from student.tests.factories import CourseEnrollmentFactory, UserFactory
 from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory
-
-from lms.djangoapps.instructor.views.api import add_certificate_exception
 
 
 class SelfGeneratedCertsSignalTest(ModuleStoreTestCase):
@@ -74,23 +73,18 @@ class WhitelistGeneratedCertificatesTest(ModuleStoreTestCase):
             'lms.djangoapps.certificates.signals.generate_certificate.apply_async',
             return_value=None
         ) as mock_generate_certificate_apply_async:
-            # with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=False):
-                # add_certificate_exception(course_key=self.course.id, student=self.user, certificate_exception={})
-                # CertificateWhitelist.objects.create(
-                #     user=self.user,
-                #     course_id=self.course.id
-                # )
-                # mock_generate_certificate_apply_async.assert_not_called()
+            with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=False):
+                add_certificate_exception(course_key=self.course.id, student=self.user, certificate_exception={})
+                mock_generate_certificate_apply_async.assert_not_called()
+                remove_certificate_exception(course_key=self.course.id, student=self.user)
+
             with waffle.waffle().override(waffle.SELF_PACED_ONLY, active=True):
                 add_certificate_exception(course_key=self.course.id, student=self.user, certificate_exception={})
-                # CertificateWhitelist.objects.create(
-                #     user=self.user,
-                #     course_id=self.course.id
-                # )
                 mock_generate_certificate_apply_async.assert_called_with(
                     student=self.user,
                     course_key=self.course.id,
                 )
+                remove_certificate_exception(course_key=self.course.id, student=self.user)
 
     def test_cert_generation_on_whitelist_append_instructor_paced(self):
         """
@@ -102,20 +96,17 @@ class WhitelistGeneratedCertificatesTest(ModuleStoreTestCase):
                 return_value=None
         ) as mock_generate_certificate_apply_async:
             with waffle.waffle().override(waffle.INSTRUCTOR_PACED_ONLY, active=False):
-                CertificateWhitelist.objects.create(
-                    user=self.user,
-                    course_id=self.ip_course.id
-                )
+                add_certificate_exception(course_key=self.ip_course.id, student=self.user, certificate_exception={})
                 mock_generate_certificate_apply_async.assert_not_called()
+                remove_certificate_exception(course_key=self.ip_course.id, student=self.user)
+
             with waffle.waffle().override(waffle.INSTRUCTOR_PACED_ONLY, active=True):
-                CertificateWhitelist.objects.create(
-                    user=self.user,
-                    course_id=self.ip_course.id
-                )
+                add_certificate_exception(course_key=self.ip_course.id, student=self.user, certificate_exception={})
                 mock_generate_certificate_apply_async.assert_called_with(
                     student=self.user,
                     course_key=self.ip_course.id
                 )
+                remove_certificate_exception(course_key=self.ip_course.id, student=self.user)
 
 
 class PassingGradeCertsTest(ModuleStoreTestCase):
