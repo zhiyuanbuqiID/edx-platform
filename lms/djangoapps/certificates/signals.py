@@ -17,40 +17,45 @@ from certificates.tasks import generate_certificate
 from courseware import courses
 from lms.djangoapps.grades.new.course_grade_factory import CourseGradeFactory
 from openedx.core.djangoapps.models.course_details import COURSE_PACING_CHANGE
-from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, LEARNER_NOW_VERIFIED
+from openedx.core.djangoapps.signals.signals import COURSE_GRADE_NOW_PASSED, LEARNER_NOW_VERIFIED, LEARNER_ADDED_TO_WHITELIST
 from student.models import CourseEnrollment
 
 
 log = logging.getLogger(__name__)
 
 
-@receiver(post_save, sender=CertificateWhitelist, dispatch_uid="append_certificate_whitelist")
-def _listen_for_certificate_whitelist_append(sender, instance, **kwargs):  # pylint: disable=unused-argument
+@receiver(LEARNER_ADDED_TO_WHITELIST, dispatch_uid="append_certificate_whitelist")
+def _listen_for_certificate_whitelist_append(sender, user, course_id, **kwargs):  # pylint: disable=unused-argument
+    log.info('This is one spot')
     switches = waffle.waffle()
     # All flags enabled
     if (
         not switches.is_enabled(waffle.SELF_PACED_ONLY) and
         not switches.is_enabled(waffle.INSTRUCTOR_PACED_ONLY)
     ):
+        log.info('This is two spot')
         return
 
     # Only SELF_PACED_ONLY flag enabled
     if not switches.is_enabled(waffle.INSTRUCTOR_PACED_ONLY):
-        if not courses.get_course_by_id(instance.course_id, depth=0).self_paced:
+        if not courses.get_course_by_id(course_id, depth=0).self_paced:
+            log.info('This is three spot')
             return
 
     # Only INSTRUCTOR_PACED_ONLY flag enabled
     if not switches.is_enabled(waffle.SELF_PACED_ONLY):
-        if courses.get_course_by_id(instance.course_id, depth=0).self_paced:
+        if courses.get_course_by_id(course_id, depth=0).self_paced:
+            log.info('This is four spot')
             return
 
+    log.info('This is five spot')
     generate_certificate.apply_async(
-        student=instance.user,
-        course_key=instance.course_id,
+        student=user,
+        course_key=course_id,
     )
     log.info(u'Certificate generation task initiated for {user} : {course} via whitelist'.format(
-        user=instance.user.id,
-        course=instance.course_id
+        user=user.id,
+        course=course_id
     ))
 
 

@@ -77,6 +77,7 @@ from openedx.core.djangoapps.course_groups.cohorts import is_course_cohorted
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from openedx.core.djangoapps.user_api.preferences.api import get_user_preference, set_user_preference
 from openedx.core.djangolib.markup import HTML, Text
+from openedx.core.djangoapps.signals import LEARNER_ADDED_TO_WHITELIST
 from shoppingcart.models import (
     Coupon,
     CourseMode,
@@ -3003,6 +3004,7 @@ def add_certificate_exception(course_key, student, certificate_exception):
             'notes': certificate_exception.get('notes', '')
         }
     )
+    LEARNER_ADDED_TO_WHITELIST.send(student, course_key)
     log.info(u'%s has been added to the whitelist in course %s', student.username, course_key)
 
     generated_certificate = GeneratedCertificate.eligible_certificates.filter(

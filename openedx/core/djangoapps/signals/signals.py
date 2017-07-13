@@ -22,3 +22,6 @@ COURSE_GRADE_NOW_PASSED = Signal(
 
 # Signal that indicates that a user has become verified
 LEARNER_NOW_VERIFIED = Signal(providing_args=['user'])
+
+# Signal that indicates that a user has been appended to the whitelist
+LEARNER_ADDED_TO_WHITELIST = Signal(providing_args['user', 'course_id'])
