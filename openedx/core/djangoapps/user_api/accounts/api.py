@@ -399,7 +399,6 @@ def request_password_change(email, orig_host, is_secure):
         # and email it to the user.
         form.save(
             from_email=configuration_helpers.get_value('email_from_address', settings.DEFAULT_FROM_EMAIL),
-            domain_override=orig_host,
             use_https=is_secure
         )
     else:
