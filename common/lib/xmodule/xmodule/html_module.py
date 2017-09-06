@@ -24,7 +24,12 @@ from xmodule.util.misc import escape_html_characters
 from xmodule.x_module import DEPRECATION_VSCOMPAT_EVENT, XModule
 from xmodule.xml_module import XmlDescriptor, name_to_pathname
 
+from lms.djangoapps.review.get_review_ids import get_records
+
 log = logging.getLogger("edx.courseware")
+# log.critical("******************** HTML_MODULE **********************")
+# get_records()
+# log.critical("******************** END_HTML_MODULE **********************")
 
 # Make '_' a no-op so we can scrape strings. Using lambda instead of
 #  `django.utils.translation.ugettext_noop` because Django cannot be imported in this file
@@ -74,6 +79,9 @@ class HtmlBlock(object):
         """
         Return a fragment that contains the html for the student view
         """
+        # log.critical("******************** START_STUDENT_VIEW **********************")
+        # get_records()
+        # log.critical("******************** END_STUDENT_VIEW **********************")
         return Fragment(self.get_html())
 
     def get_html(self):
@@ -83,7 +91,9 @@ class HtmlBlock(object):
         # but for now the XModule mixin requires that this method be defined.
         # pylint: disable=no-member
         if self.system.anonymous_student_id:
-            return self.data.replace("%%USER_ID%%", self.system.anonymous_student_id)
+            url = get_records()
+            return self.data.replace("%%PROBLEM_URL%%", url)
+            # return self.data.replace("%%USER_ID%%", self.system.anonymous_student_id)
         return self.data
 
 
