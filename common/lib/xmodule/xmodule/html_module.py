@@ -24,6 +24,8 @@ from xmodule.util.misc import escape_html_characters
 from xmodule.x_module import DEPRECATION_VSCOMPAT_EVENT, XModule
 from xmodule.xml_module import XmlDescriptor, name_to_pathname
 
+from lms.djangoapps.review.get_review_ids import get_records
+
 log = logging.getLogger("edx.courseware")
 
 # Make '_' a no-op so we can scrape strings. Using lambda instead of
@@ -83,6 +85,16 @@ class HtmlBlock(object):
         # but for now the XModule mixin requires that this method be defined.
         # pylint: disable=no-member
         if self.system.anonymous_student_id:
+            # List of 5 problem urls I want to show
+            url_list = get_records(5, self.course_id)
+            # for i in xrange(len(url_list)):
+                # Adds the problem urls into the iFrame template
+                # self.data = self.data.format("%%PROBLEM_URL_" + str(i) +"%%", url_list[i])
+            return self.data.format(PROBLEM_URL_0= url_list[0],
+                                    PROBLEM_URL_1= url_list[1],
+                                    PROBLEM_URL_2= url_list[2],
+                                    PROBLEM_URL_3= url_list[3],
+                                    PROBLEM_URL_4= url_list[4])
             return self.data.replace("%%USER_ID%%", self.system.anonymous_student_id)
         return self.data
 
