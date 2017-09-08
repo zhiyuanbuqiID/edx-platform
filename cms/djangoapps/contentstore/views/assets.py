@@ -88,6 +88,22 @@ def _asset_index(request, course_key):
     })
 
 
+def _build_filter_params(filters, exclude=False):
+    """
+    Helper I threw together quickly.
+    """
+    where = [
+        "JSON.stringify(this.contentType).toUpperCase() == JSON.stringify('{}').toUpperCase()".format(f)
+        for f in filters
+    ]
+    compound_string = ' || '.join(where)
+    if exclude:
+        compound_string = "NOT ({})".format(compound_string)
+    return {
+        "$where": compound_string,
+    }
+
+
 def _assets_json(request, course_key):
     """
     Display an editable asset library.
@@ -103,22 +119,16 @@ def _assets_json(request, course_key):
     filter_params = None
     if requested_filter:
         if requested_filter == 'OTHER':
-            all_filters = settings.FILES_AND_UPLOAD_TYPE_FILTERS
-            where = []
-            for all_filter in all_filters:
-                extension_filters = all_filters[all_filter]
-                where.extend(
-                    ["JSON.stringify(this.contentType).toUpperCase() != JSON.stringify('{}').toUpperCase()".format(
-                        extension_filter) for extension_filter in extension_filters])
-            filter_params = {
-                "$where": ' && '.join(where),
-            }
+            filter_params = _build_filter_params(
+                [
+                    extension_filter
+                    for all_filter in settings.FILES_AND_UPLOAD_TYPE_FILTERS
+                    for extension_filter in all_filter
+                ],
+                exclude=True
+            )
         else:
-            where = ["JSON.stringify(this.contentType).toUpperCase() == JSON.stringify('{}').toUpperCase()".format(
-                req_filter) for req_filter in requested_file_types]
-            filter_params = {
-                "$where": ' || '.join(where),
-            }
+            filter_params = _build_filter_params(requested_file_types)
 
     sort_direction = DESCENDING
     if request.GET.get('direction', '').lower() == 'asc':
