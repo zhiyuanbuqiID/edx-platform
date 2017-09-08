@@ -35,7 +35,8 @@ def get_records(num_desired, current_course):
     # local_template_url = '/xblock/block-v1:{course_id}+type@problem+block@{problem_id}'
     urls = []
     for problem in problems_to_show:
-        urls.append(local_template_url.format(course_id=review_course_id, problem_id=problem))
+        urls.append(template_url.format(course_id=review_course_id, problem_id=problem))
+        # urls.append(local_template_url.format(course_id=review_course_id, problem_id=problem))
     return urls
     # return template_url.format(course_id=review_course_id, problem_id=problem_to_show)
     # return 'https://courses.edx.org/xblock/block-v1:MITx+6.002.1x_1+2T2016+type@problem+block@903ce05eb08e452ba9991a2756d3cce2'
