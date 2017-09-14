@@ -40,11 +40,11 @@ def get_records(num_desired, current_course):
         problem = str(record.module_state_key).split("@")
         problem_ids.append(problem[-1])
     problems_to_show = random.sample(problem_ids, num_desired)
-    template_url = 'https://dillon-dumesnil.sandbox.edx.org/xblock/block-v1:{course_id}+type@problem+block@{problem_id}'
-    # local_template_url = '/xblock/block-v1:{course_id}+type@problem+block@{problem_id}'
+    # template_url = 'https://dillon-dumesnil.sandbox.edx.org/xblock/block-v1:{course_id}+type@problem+block@{problem_id}'
+    local_template_url = '/xblock/block-v1:{course_id}+type@problem+block@{problem_id}'
     review_course_id = REVIEW_COURSE_MAPPING[str(current_course)]
     urls = []
     for problem in problems_to_show:
-        urls.append(template_url.format(course_id=review_course_id, problem_id=problem))
-        # urls.append(local_template_url.format(course_id=review_course_id, problem_id=problem))
+        # urls.append(template_url.format(course_id=review_course_id, problem_id=problem))
+        urls.append(local_template_url.format(course_id=review_course_id, problem_id=problem))
     return urls

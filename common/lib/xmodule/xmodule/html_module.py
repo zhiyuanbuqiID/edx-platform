@@ -87,6 +87,8 @@ class HtmlBlock(object):
         if self.system.anonymous_student_id:
             # List of 5 problem urls I want to show
             url_list = get_records(5, self.course_id)
+
+            # Try using a temp variable
             # for i in xrange(len(url_list)):
                 # Adds the problem urls into the iFrame template
                 # self.data = self.data.format("%%PROBLEM_URL_" + str(i) +"%%", url_list[i])
