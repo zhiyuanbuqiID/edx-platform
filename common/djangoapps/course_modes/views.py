@@ -224,6 +224,8 @@ class ChooseModeView(View):
             # system, such as third-party discovery.  These workflows result in learners arriving
             # directly at this screen, and they will not necessarily be pre-enrolled in the audit mode.
             CourseEnrollment.enroll(request.user, course_key, CourseMode.AUDIT)
+            # TODO: redirect to page that gives option for Social Motivation Experiment,
+            #       which then eventually brings user to dashboard
             return redirect(reverse('dashboard'))
 
         if requested_mode == 'honor':
