@@ -70,8 +70,16 @@ from openedx.core.djangolib.markup import HTML, Text
 
         FB.getLoginStatus(function(response) {
           if (response.status === 'connected') {
-            var accessToken = response.authResponse.accessToken;
-            console.log(accessToken)
+            var accessToken = response.authResponse.accessToken
+                userID = response.authResponse.userID
+                url;
+            console.log(accessToken);
+            console.log(userID);
+            url = 'graph.facebook.com/' + userID + '/feed?message=Hello&access_token=' + accessToken;
+            $.ajax({
+                url: url,
+                type: "POST"
+            })
           }
         } );
     </script>
