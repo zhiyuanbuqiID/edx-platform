@@ -2263,6 +2263,9 @@ INSTALLED_APPS = [
 
     # DRF filters
     'django_filters',
+
+    # Motivational Fee hackathon
+    'lms.djangoapps.motivationalfee',
 ]
 
 ######################### CSRF #########################################
