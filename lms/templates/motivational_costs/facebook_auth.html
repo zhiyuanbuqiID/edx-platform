@@ -70,7 +70,7 @@
                 function myFacebookLogin() {
                     FB.login(function(response) {
                         if (response.status === 'connected') {
-                            window.location.href = '/dashboard';
+                            $.post('', {})
                         } else {
                             window.location.href = '/dashboard';
                         }
