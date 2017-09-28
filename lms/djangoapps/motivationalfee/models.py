@@ -21,10 +21,9 @@ class FacebookMotivationalPostConfig(TimeStampedModel):
 
     user_id = models.PositiveIntegerField(null=False, blank=False)
     course_run_id = models.CharField(max_length=255, null=False, blank=False)
-    target_end_date = models.DateTimeField(null=False, blank=False)
+    target_end_date = models.DateTimeField(null=True, blank=True)
     fb_user_id = models.CharField(max_length=255, null=False, blank=False)
     fb_access_token = models.CharField(max_length=255, null=False, blank=False)
-
 
     class Meta(object):
         app_label = 'motivationalfee'
