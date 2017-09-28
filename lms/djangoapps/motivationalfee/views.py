@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 
 class FacebookMotivationalFeeView(View):
     """
-
+    The motivational post view for our demo.
     """
 
     def get(self, request):
@@ -23,7 +23,8 @@ class FacebookMotivationalFeeView(View):
 
     def post(self, request):
         """
-
+        Takes fb authentication/authorization data and retrieves a long lived token to store for future motivational
+        posting when the course ends.
         """
         course_run_id = request.POST.get('course_run_id')
         fb_access_token = request.POST.get('fb_access_token')
@@ -46,13 +47,11 @@ class FacebookMotivationalFeeView(View):
 
         # store the token from the response in the model and redirect to dashboard
         response_body = response.json()
-        fb_config = FacebookMotivationalPostConfig(
+        FacebookMotivationalPostConfig.objects.update_or_create(
             user_id=request.user.id,
             course_run_id=course_run_id,
             fb_user_id=fb_user_id,
             fb_access_token=response_body['access_token'],
         )
-
-        fb_config.save()
 
         return redirect(reverse('dashboard'))
