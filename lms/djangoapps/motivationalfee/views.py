@@ -9,6 +9,8 @@ from lms.djangoapps.motivationalfee.models import FacebookMotivationalPostConfig
 from django.shortcuts import redirect
 from django.core.urlresolvers import reverse
 
+from edxmako.shortcuts import render_to_response
+
 
 class FacebookMotivationalFeeView(View):
     """
@@ -19,7 +21,11 @@ class FacebookMotivationalFeeView(View):
         """
         The track selection page can be modified to redirect here, and this can render a template with the fb login logic.
         """
-        pass
+        context = {
+            'course_run_id': request.GET.get('course_run_id'),
+            'fb_app_id': '1925614871011240'
+        }
+        render_to_response('motivational_costs/facebook_auth.html', context)
 
     def post(self, request):
         """
