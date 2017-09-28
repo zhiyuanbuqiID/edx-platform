@@ -7,6 +7,7 @@ urlpatterns = patterns(
     '',
     # pylint seems to dislike as_view() calls because it's a `classonlymethod` instead of `classmethod`, so we disable the warning
     url(r'^choose/{}/$'.format(settings.COURSE_ID_PATTERN), views.ChooseModeView.as_view(), name='course_modes_choose'),
+    url(r'^motivate/{}/$'.format(settings.COURSE_ID_PATTERN), views.FacebookMotivationalFeeView.as_view(), name='motivational_post'),
 )
 
 # Enable verified mode creation
