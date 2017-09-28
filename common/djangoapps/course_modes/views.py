@@ -224,7 +224,7 @@ class ChooseModeView(View):
             # system, such as third-party discovery.  These workflows result in learners arriving
             # directly at this screen, and they will not necessarily be pre-enrolled in the audit mode.
             CourseEnrollment.enroll(request.user, course_key, CourseMode.AUDIT)
-            return redirect("motivational_post", kwargs={'course_id': unicode(course_id)})
+            return redirect(reverse("motivational_post", kwargs={'course_id': unicode(course_id)}))
 
         if requested_mode == 'honor':
             CourseEnrollment.enroll(user, course_key, mode=requested_mode)
