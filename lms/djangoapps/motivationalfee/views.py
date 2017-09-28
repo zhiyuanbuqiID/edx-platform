@@ -25,7 +25,7 @@ class FacebookMotivationalFeeView(View):
             'course_run_id': request.GET.get('course_run_id'),
             'fb_app_id': '1925614871011240'
         }
-        render_to_response('motivational_costs/facebook_auth.html', context)
+        return render_to_response('motivational_costs/facebook_auth.html', dictionary=context)
 
     def post(self, request):
         """

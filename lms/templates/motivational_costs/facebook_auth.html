@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>edX.org</title>
+  <meta name="description" content="edX Where People Go To Learn">
+  <meta name="author" content="SitePoint">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="style2.css">
+  <link rel="stylesheet" href="https://opensource.keycdn.com/fontawesome/4.7.0/font-awesome.min.css" integrity="sha384-dNpIIXE8U05kAbPhy3G1cz+yZmTzA6CY8Vg/u2L9xRnHjJiAK76m2BIEaSEV+/aU" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">
+  <!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.js"></script>
+  <![endif]-->
+
+  <style>
+    h1 {font-size:22px;}
+
+    h2 {font-size:18px;}
+
+    strong{color:green;
+      font-weight:bold;}
+
+    .step{padding-bottom: 17px;}
+
+    #bottom{text-align:right;
+      padding-right:120px;}
+</style>
+
+</head>
+
+<body style="font-family: Open Sans">
+
+<main>
+<div class="container">
+  <div class="row" style="padding-top: 15px;">
+
+      <div class="col-sm-12 col-md-6" style="" id="left">
+      <br>
+      <h1> Want extra motivation to complete your course? </h1>
+      <br>
+      <h2 style="padding-bottom:10px;"> How it works:</h2>
+        <ul style="list-style:none">
+          <li class="step"><strong>Step 1.</strong> Choose a date by which you would like to complete this course.</li>
+          <li class="step"><strong>Step 2.</strong> Choose an amount of money you would like to use as your motivator.</li>
+          <li class="step"><strong>Step 3.</strong> We remind you about your deadline via Google Calendar. </li>
+          <li class="step"><strong>Step 4.</strong> If you fail to complete the course with a passing grade by this date, you are charged the amount you chose.</li>
+        </ul>
+        <script>
+            window.fbAsyncInit = function() {
+                    FB.init({
+                    appId            : '1925614871011240',
+                    autoLogAppEvents : true,
+                    xfbml            : true,
+                    version          : 'v2.10'
+                    });
+                    FB.AppEvents.logPageView();
+                };
+            
+                (function(d, s, id){
+                    var js, fjs = d.getElementsByTagName(s)[0];
+                    if (d.getElementById(id)) {return;}
+                    js = d.createElement(s); js.id = id;
+                    js.src = "//connect.facebook.net/en_US/sdk.js";
+                    fjs.parentNode.insertBefore(js, fjs);
+                }(document, 'script', 'facebook-jssdk'));
+
+                function myFacebookLogin() {
+                    FB.login(function(response) {
+                        if (response.status === 'connected') {
+                            window.location.href = '/dashboard';
+                        } else {
+                            window.location.href = '/dashboard';
+                        }
+                    }, {scope: 'publish_actions'});
+                }
+        </script>
+        <button type="button" class="btn btn-primary col-12" onclick="myFacebookLogin()"><i class="fa fa-facebook-official"></i> Try it out!</button>
+
+      </div>
+
+
+  <div class="col-sm-12 col-md-6" id="right" style="">
+     <img style="width:400px;" src="/static/images/motivational_costs/post.png">
+    
+  </div>
+  <div class="col-12" id="bottom">
+  <br>
+  <a href="/dashboard"> No thanks, take me to my course </a>
+</div>
+</main>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+</body>
+</html>

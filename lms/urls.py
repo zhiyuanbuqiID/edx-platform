@@ -119,7 +119,7 @@ urlpatterns = (
 
     url(r'^dashboard/', include('learner_dashboard.urls')),
     url(r'^api/experiments/', include('experiments.urls', namespace='api_experiments')),
-    url(r'^motivate/', include('lms.djangoapps.motivationalfee.urls', namespace='motivational')),
+    url(r'^motivate/', include('motivationalfee.urls')),
 )
 
 # TODO: This needs to move to a separate urls.py once the student_account and
