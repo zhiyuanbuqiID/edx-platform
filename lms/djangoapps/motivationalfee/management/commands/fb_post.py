@@ -5,12 +5,15 @@ from __future__ import absolute_import, unicode_literals
 from django.core.management.base import BaseCommand
 from lms.djangoapps.certificates.models import CertificateStatuses, GeneratedCertificate
 from lms.djangoapps.motivationalfee.models import FacebookMotivationalPostConfig
+import requests
 
 
 class Command(BaseCommand):
     """
     posts to FB on the behalf of users that have not completed a course by its end
     """
+
+    MOTIVATIONAL_FB_POST = ''
 
     def add_arguments(self, parser):
         """
@@ -45,4 +48,10 @@ class Command(BaseCommand):
                 self.post_to_facebook(fb_config)
 
     def post_to_facebook(self, fb_config):
-        pass
+        requests.post(
+            'https://graph.facebook.com/me/feed',
+            json={
+                'message': self.MOTIVATIONAL_FB_POST.format(),
+                'access_token': fb_config.access_token,
+            }
+        )
