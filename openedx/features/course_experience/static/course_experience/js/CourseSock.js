@@ -24,8 +24,8 @@ export class CourseSock {  // eslint-disable-line import/prefer-default-export
         - ($upgradeToVerifiedButton.width() + 22);
 
       // Update positioning when scrolling is in fixed window and screen width is sufficient
-      if ((documentBottom > startFixed && documentBottom < endFixed)
-          || $(window).width() < 960) {
+      if ((documentBottom > startFixed && documentBottom < endFixed
+          && $(window).width() > 960)) {
         $upgradeToVerifiedButton.addClass('attached');
         $upgradeToVerifiedButton.css('left', `${distLeft}px`);
       } else {
