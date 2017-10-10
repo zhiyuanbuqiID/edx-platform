@@ -499,20 +499,21 @@ class CourseOverview(TimeStampedModel):
         the given course_keys.
 
         Arguments:
-            course_keys (list[CourseKey]): Identifies for which courses to
+            course_keys: Identifies for which courses to
                 return CourseOverview objects.
             force_update (boolean): Optional parameter that indicates
                 whether the requested CourseOverview objects should be
                 forcefully updated (i.e., re-synched with the modulestore).
         """
-        log.info('Generating course overview for %d courses.', len(course_keys))
-        log.debug('Generating course overview(s) for the following courses: %s', course_keys)
+        log.info('Generating course overviews.')
 
         action = CourseOverview.load_from_module_store if force_update else CourseOverview.get_from_id
 
+        count = 0
         for course_key in course_keys:
             try:
                 action(course_key)
+                count += 1
             except Exception as ex:  # pylint: disable=broad-except
                 log.exception(
                     'An error occurred while generating course overview for %s: %s',
@@ -520,7 +521,30 @@ class CourseOverview(TimeStampedModel):
                     ex.message,
                 )
 
-        log.info('Finished generating course overviews.')
+        log.info('Finished generating course overviews for %s courses.', count)
+
+    @classmethod
+    def update_course(cls, course_key, force_update=False):
+        """
+        A side-effecting method that updates CourseOverview object for
+        the given course_key.
+
+        Arguments:
+            course_key: Identifies for which course to
+                return CourseOverview objects.
+            force_update (boolean): Optional parameter that indicates
+                whether the requested CourseOverview objects should be
+                forcefully updated (i.e., re-synched with the modulestore).
+        """
+        action = CourseOverview.load_from_module_store if force_update else CourseOverview.get_from_id
+        try:
+            action(course_key)
+        except Exception as ex:  # pylint: disable=broad-except
+            log.exception(
+                'An error occurred while generating course overview for %s: %s',
+                unicode(course_key),
+                ex.message,
+            )
 
     @classmethod
     def get_all_courses(cls, orgs=None, filter_=None):

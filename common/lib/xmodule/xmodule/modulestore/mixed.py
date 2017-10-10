@@ -21,6 +21,8 @@ from .exceptions import ItemNotFoundError, DuplicateCourseError
 from .draft_and_published import ModuleStoreDraftAndPublished
 from .split_migrator import SplitMigrator
 
+from memory_profiler import profile
+
 new_contract('CourseKey', CourseKey)
 new_contract('AssetKey', AssetKey)
 new_contract('AssetMetadata', AssetMetadata)
@@ -286,25 +288,15 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         store = self._get_modulestore_for_courselike(course_key)
         return store.get_items(course_key, **kwargs)
 
-    @strip_key
+    @profile
     def get_course_summaries(self, **kwargs):
         """
         Returns a list containing the course information in CourseSummary objects.
         Information contains `location`, `display_name`, `locator` of the courses in this modulestore.
         """
-        course_summaries = {}
         for store in self.modulestores:
             for course_summary in store.get_course_summaries(**kwargs):
-                course_id = self._clean_locator_for_mapping(locator=course_summary.id)
-
-                # Check if course is indeed unique. Save it in result if unique
-                if course_id in course_summaries:
-                    log.warning(
-                        u"Modulestore %s have duplicate courses %s; skipping from result.", store, course_id
-                    )
-                else:
-                    course_summaries[course_id] = course_summary
-        return course_summaries.values()
+                yield course_summary
 
     @strip_key
     def get_courses(self, **kwargs):

@@ -13,6 +13,8 @@ from opaque_keys.edx.locator import CourseLocator, LibraryLocator, LibraryUsageL
 from xmodule.modulestore.split_mongo import BlockKey
 from contracts import contract
 
+from memory_profiler import profile
+
 
 class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPublished):
     """
@@ -74,21 +76,20 @@ class DraftVersioningModuleStore(SplitMongoModuleStore, ModuleStoreDraftAndPubli
             source_course_id, dest_course_id, user_id, fields=fields, **kwargs
         )
 
+    @profile
     def get_course_summaries(self, **kwargs):
         """
-        Returns course summaries on the Draft or Published branch depending on the branch setting.
+        Yields course summaries on the Draft or Published branch depending on the branch setting.
         """
         branch_setting = self.get_branch_setting()
         if branch_setting == ModuleStoreEnum.Branch.draft_preferred:
-            return super(DraftVersioningModuleStore, self).get_course_summaries(
-                ModuleStoreEnum.BranchName.draft, **kwargs
-            )
+            branch = ModuleStoreEnum.BranchName.draft
         elif branch_setting == ModuleStoreEnum.Branch.published_only:
-            return super(DraftVersioningModuleStore, self).get_course_summaries(
-                ModuleStoreEnum.BranchName.published, **kwargs
-            )
+            branch = ModuleStoreEnum.BranchName.published
         else:
             raise InsufficientSpecificationError()
+        for summary in super(DraftVersioningModuleStore, self).get_course_summaries(branch, **kwargs):
+            yield summary
 
     def get_courses(self, **kwargs):
         """

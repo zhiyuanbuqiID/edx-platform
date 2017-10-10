@@ -92,6 +92,7 @@ from collections import defaultdict
 from types import NoneType
 from xmodule.assetstore import AssetMetadata
 
+from memory_profiler import profile
 
 log = logging.getLogger(__name__)
 
@@ -546,6 +547,7 @@ class SplitBulkWriteMixin(BulkOperationsMixin):
 
         return indexes
 
+    # @profile
     def find_course_blocks_by_id(self, ids):
         """
         Find all structures that specified in `ids`. Filter the course blocks to only return whose
@@ -877,6 +879,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         # add it in the envelope for the structure.
         return CourseEnvelope(course_key.replace(version_guid=version_guid), entry)
 
+    @profile
     def _get_course_blocks_for_branch(self, branch, **kwargs):
         """
         Internal generator for fetching lists of courses without loading them.
@@ -903,6 +906,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
             for course_index in id_version_map[entry['_id']]:
                 yield entry, course_index
 
+    # @profile
     def collect_ids_from_matching_indexes(self, branch, **kwargs):
         """
         Find the course_indexes which have the specified branch. if `kwargs` contains `org`
@@ -971,7 +975,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         qualifiers should be a dict of keywords matching the db fields or any
         legal query for mongo to use against the active_versions collection.
 
-        Note, this is to find the current head of the named branch type.
+        Note, this is to find the current head of the named  fbranch type.
         To get specific versions via guid use get_course.
 
         :param branch: the branch for which to return courses.
@@ -980,6 +984,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
         return self._get_structures_for_branch_and_locator(branch, self._create_course_locator, **kwargs)
 
     @autoretry_read()
+    # @profile
     def get_course_summaries(self, branch, **kwargs):
         """
         Returns a list of `CourseSummary` which matching any given qualifiers.
@@ -1002,7 +1007,6 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                 if field in course.fields
             }
 
-        courses_summaries = []
         for entry, structure_info in self._get_course_blocks_for_branch(branch, **kwargs):
             course_locator = self._create_course_locator(structure_info, branch=None)
             course_block = [
@@ -1018,10 +1022,7 @@ class SplitMongoModuleStore(SplitBulkWriteMixin, ModuleStoreWriteBase):
                     "Expected 1 course block to be found in the course, but found {0}".format(len(course_block))
                 )
             course_summary = extract_course_summary(course_block[0])
-            courses_summaries.append(
-                CourseSummary(course_locator, **course_summary)
-            )
-        return courses_summaries
+            yield CourseSummary(course_locator, **course_summary)
 
     def get_libraries(self, branch="library", **kwargs):
         """

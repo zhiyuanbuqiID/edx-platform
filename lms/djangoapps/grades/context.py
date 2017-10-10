@@ -11,7 +11,7 @@ from .scores import possibly_scored
 
 def grading_context_for_course(course):
     """
-    Same as grading_context, but takes in a course key.
+    Same as grading_context, but takes in a course.
     """
     course_structure = get_course_in_cache(course.id)
     return grading_context(course, course_structure)

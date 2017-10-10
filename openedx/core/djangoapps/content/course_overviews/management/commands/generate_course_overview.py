@@ -15,6 +15,13 @@ from openedx.core.djangoapps.content.course_overviews.tasks import (
     enqueue_async_course_overview_update_tasks
 )
 
+from opaque_keys.edx.keys import CourseKey
+from xmodule.modulestore.django import modulestore
+
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
+
+from memory_profiler import profile
+from guppy import hpy
 
 log = logging.getLogger(__name__)
 
@@ -58,19 +65,36 @@ class Command(BaseCommand):
             help=u'The celery routing key to use.'
         )
 
+    # def handle(self, *args, **options):
+    #     if not options.get('all_courses') and len(args) < 1:
+    #         raise CommandError('At least one course or --all-courses must be specified.')
+    #
+    #     kwargs = {}
+    #     for key in ('all_courses', 'force_update', 'chunk_size', 'routing_key'):
+    #         if options.get(key):
+    #             kwargs[key] = options[key]
+    #
+    #     try:
+    #         enqueue_async_course_overview_update_tasks(
+    #             course_ids=args,
+    #             **kwargs
+    #         )
+    #     except InvalidKeyError as exc:
+    #         raise CommandError(u'Invalid Course Key: ' + unicode(exc))
+
+    # @profile
     def handle(self, *args, **options):
-        if not options.get('all_courses') and len(args) < 1:
-            raise CommandError('At least one course or --all-courses must be specified.')
 
-        kwargs = {}
-        for key in ('all_courses', 'force_update', 'chunk_size', 'routing_key'):
-            if options.get(key):
-                kwargs[key] = options[key]
-
-        try:
-            enqueue_async_course_overview_update_tasks(
-                course_ids=args,
-                **kwargs
-            )
-        except InvalidKeyError as exc:
-            raise CommandError(u'Invalid Course Key: ' + unicode(exc))
+        h = hpy()
+        if options['all_courses']:
+            for summary in modulestore().get_course_summaries():
+                CourseOverview.update_course(summary.id, force_update=options.get('force_update'))
+        else:
+            if len(args) < 1:
+                raise CommandError('At least one course or --all must be specified.')
+            try:
+                for course_key in (CourseKey.from_string(arg) for arg in args):
+                    CourseOverview.update_course(course_key, force_update=options.get('force_update'))
+            except InvalidKeyError:
+                raise CommandError('Invalid key specified.')
+        h.heap()

@@ -41,6 +41,9 @@ def _task_options(routing_key):
     return task_options
 
 
+# from memory_profiler import profile
+#
+# @profile
 def enqueue_async_course_overview_update_tasks(
         course_ids,
         all_courses=False,
@@ -65,6 +68,7 @@ def enqueue_async_course_overview_update_tasks(
 
 
 @task(base=_BaseTask)
+# @profile
 def async_course_overview_update(*args, **kwargs):
     course_keys = [CourseKey.from_string(arg) for arg in args]
     CourseOverview.update_select_courses(course_keys, force_update=kwargs['force_update'])
