@@ -18,7 +18,7 @@ from courseware.date_summary import verified_upgrade_deadline_link, verified_upg
 from openedx.core.djangoapps.monitoring_utils import function_trace, set_custom_metric
 from openedx.core.djangoapps.schedules.config import COURSE_UPDATE_WAFFLE_FLAG
 from openedx.core.djangoapps.schedules.exceptions import CourseUpdateDoesNotExist
-from openedx.core.djangoapps.schedules.models import DEFAULT_EXPERIENCE_TYPE, EXPERIENCE_TYPES, Schedule
+from openedx.core.djangoapps.schedules.models import Schedule, ScheduleExperience
 from openedx.core.djangoapps.schedules.utils import PrefixedDebugLoggerMixin
 from openedx.core.djangoapps.schedules.template_context import (
     absolute_url,
@@ -75,7 +75,7 @@ class BinnedSchedulesBaseResolver(PrefixedDebugLoggerMixin, RecipientResolver):
 
     schedule_date_field = None
     num_bins = DEFAULT_NUM_BINS
-    experience_filter = Q(experience=DEFAULT_EXPERIENCE_TYPE) | Q(experience__isnull=True)
+    experience_filter = Q(experience=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
 
     def __attrs_post_init__(self):
         # TODO: in the next refactor of this task, pass in current_datetime instead of reproducing it here
@@ -238,9 +238,10 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
     @property
     def experience_filter(self):
         if self.day_offset == -3:
-            return Q(experience__in=[DEFAULT_EXPERIENCE_TYPE, EXPERIENCE_TYPES[1][0]]) | Q(experience__isnull=True)
+            experiences = [ScheduleExperience.DEFAULT, ScheduleExperience.COURSE_UPDATES]
+            return Q(experience__in=experiences) | Q(experience__isnull=True)
         else:
-            return Q(experience=DEFAULT_EXPERIENCE_TYPE) | Q(experience__isnull=True)
+            return Q(experience=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
 
     def get_template_context(self, user, user_schedules):
         first_schedule = user_schedules[0]
@@ -343,7 +344,7 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
     log_prefix = 'Course Update'
     schedule_date_field = 'start'
     num_bins = COURSE_UPDATE_NUM_BINS
-    experience_filter = Q(experience=EXPERIENCE_TYPES[1][0])
+    experience_filter = Q(experience=ScheduleExperience.COURSE_UPDATES)
 
     def schedules_for_bin(self):
         week_num = abs(self.day_offset) / 7

@@ -6,13 +6,6 @@ from model_utils.models import TimeStampedModel
 from config_models.models import ConfigurationModel
 
 
-EXPERIENCE_TYPES = (
-    (0, 'Recurring Nudge and Upgrade Reminder'),
-    (1, 'Course Updates'),
-)
-DEFAULT_EXPERIENCE_TYPE = EXPERIENCE_TYPES[0][0]
-
-
 class Schedule(TimeStampedModel):
     enrollment = models.OneToOneField('student.CourseEnrollment', null=False)
     active = models.BooleanField(
@@ -55,5 +48,12 @@ class ScheduleConfig(ConfigurationModel):
 
 
 class ScheduleExperience(models.Model):
+    DEFAULT = 0
+    COURSE_UPDATES = 1
+    EXPERIENCES = (
+        (DEFAULT, 'Recurring Nudge and Upgrade Reminder'),
+        (COURSE_UPDATES, 'Course Updates')
+    )
+
     schedule = models.OneToOneField(Schedule, related_name='experience')
-    experience_type = models.IntegerField(choices=EXPERIENCE_TYPES, default=DEFAULT_EXPERIENCE_TYPE)
+    experience_type = models.PositiveSmallIntegerField(choices=EXPERIENCES, default=DEFAULT)
