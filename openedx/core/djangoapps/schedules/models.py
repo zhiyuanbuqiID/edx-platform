@@ -24,10 +24,10 @@ class Schedule(TimeStampedModel):
     )
 
     def get_experience_type(self):
-        if (hasattr(self, 'experience')):
+        try:
             return self.experience.experience_type
-        else:
-            return DEFAULT_EXPERIENCE_TYPE
+        except ScheduleExperience.DoesNotExist:
+            return ScheduleExperience.DEFAULT
 
     class Meta(object):
         verbose_name = _('Schedule')
