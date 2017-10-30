@@ -16,6 +16,7 @@ from edx_ace.recipient import Recipient
 from edx_ace.utils.date import deserialize
 from edxmako.shortcuts import marketing_link
 from opaque_keys.edx.keys import CourseKey
+from lms.lib.comment_client.user import is_user_subscribed_to_thread
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
@@ -34,7 +35,7 @@ class ResponseNotification(MessageType):
 def send_ace_message(**kwargs):
     thread_id = kwargs['thread_id']
     thread_user_id = kwargs['thread_user_id']
-    if _user_is_subscribed_to_thread(thread_user_id, thread_id):
+    if is_user_subscribed_to_thread(thread_user_id, thread_id):
         commenting_user = User.objects.get(id=kwargs['comment_user_id'])
         context = _get_base_template_context(Site.objects.get_current())
         message = ResponseNotification().personalize(
@@ -43,11 +44,6 @@ def send_ace_message(**kwargs):
             context
         )
         # ace.send(message)
-
-
-def _user_is_subscribed_to_thread(user_id, thread_id):
-    pass
-
 
 def _get_course_language(course_id):
     try:

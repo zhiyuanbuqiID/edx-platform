@@ -135,6 +135,20 @@ class User(models.Model):
             thread_count=response.get('thread_count', 0)
         )
 
+    def is_user_subscribed_to_thread(self, thread_id):
+        # url = _url_for_user_subscribed_threads(self.id)
+        # params = {'course_id': thread_id.course_id}
+        # response = utils.perform_request(
+        #     'get',
+        #     url,
+        #     params,
+        #     metric_action='user.subscribed_threads',
+        #     metric_tags=self._metric_tags,
+        #     paged_results=True
+        # )
+
+        subscribed_threads = self.subscribed_threads()
+
     def _retrieve(self, *args, **kwargs):
         url = self.url(action='get', params=self.attributes)
         retrieve_params = self.default_retrieve_params.copy()
