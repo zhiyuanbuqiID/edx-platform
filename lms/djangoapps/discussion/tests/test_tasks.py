@@ -60,7 +60,9 @@ class BlaTestCase(ModuleStoreTestCase):
         config.enabled = True
         config.save()
 
-    def test_send_message(self):
+    @patch('student.models.cc.User.from_django_user')
+    @patch('student.models.cc.User.subscribed_threads')
+    def test_send_message(self, mock_threads, mock_from_django_user):
         send_ace_message(
             thread_id='thread_id',
             thread_user_id=self.thread_user.id,

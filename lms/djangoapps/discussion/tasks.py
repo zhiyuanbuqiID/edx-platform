@@ -81,11 +81,11 @@ def _encode_url(url):
 def _absolute_url(site, relative_path):
     root = site.domain.rstrip('/')
     relative_path = relative_path.lstrip('/')
-    return encode_url(u'https://{root}/{path}'.format(root=root, path=relative_path))
+    return _encode_url(u'https://{root}/{path}'.format(root=root, path=relative_path))
 
 
 def _encode_urls_in_dict(mapping):
     urls = {}
     for key, value in mapping.iteritems():
-        urls[key] = encode_url(value)
+        urls[key] = _encode_url(value)
     return urls
