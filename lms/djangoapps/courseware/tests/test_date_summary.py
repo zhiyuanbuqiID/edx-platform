@@ -586,9 +586,10 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         course start date. """
         global_config = DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
         course = create_self_paced_course_run(days_till_start=3)
+        course_overview = CourseOverview.load_from_module_store(course.id)
         overview = CourseOverview.get_from_id(course.id)
         expected = overview.start + timedelta(days=global_config.deadline_days)
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         block = VerifiedUpgradeDeadlineDate(course, enrollment.user)
         self.assertEqual(block.date, expected)
         self._check_text(block)
@@ -612,7 +613,8 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         """
         global_config = DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
         course = create_self_paced_course_run(days_till_start=-1, org_id='TestOrg')
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        course_overview = CourseOverview.load_from_module_store(course.id)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         block = VerifiedUpgradeDeadlineDate(course, enrollment.user)
         expected = enrollment.created + timedelta(days=global_config.deadline_days)
         self.assertEqual(block.date, expected)
@@ -621,7 +623,7 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         org_config = OrgDynamicUpgradeDeadlineConfiguration.objects.create(
             enabled=True, org_id=course.org, deadline_days=4
         )
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         block = VerifiedUpgradeDeadlineDate(course, enrollment.user)
         expected = enrollment.created + timedelta(days=org_config.deadline_days)
         self.assertEqual(block.date, expected)
@@ -630,7 +632,7 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         course_config = CourseDynamicUpgradeDeadlineConfiguration.objects.create(
             enabled=True, course_id=course.id, deadline_days=3
         )
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         block = VerifiedUpgradeDeadlineDate(course, enrollment.user)
         expected = enrollment.created + timedelta(days=course_config.deadline_days)
         self.assertEqual(block.date, expected)
@@ -641,8 +643,9 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         expiration date being returned. """
         DynamicUpgradeDeadlineConfiguration.objects.create(enabled=False)
         course = create_self_paced_course_run()
+        course_overview = CourseOverview.load_from_module_store(course.id)
         expected = CourseMode.objects.get(course_id=course.id, mode_slug=CourseMode.VERIFIED).expiration_datetime
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         block = VerifiedUpgradeDeadlineDate(course, enrollment.user)
         self.assertEqual(block.date, expected)
 
@@ -651,9 +654,10 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         """ If a schedule is created while deadlines are disabled, they shouldn't magically appear once the feature is
         turned on. """
         course = create_self_paced_course_run(days_till_start=-1)
+        course_overview = CourseOverview.load_from_module_store(course.id)
         DynamicUpgradeDeadlineConfiguration.objects.create(enabled=False)
         course_config = CourseDynamicUpgradeDeadlineConfiguration.objects.create(enabled=False, course_id=course.id)
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
 
         # The enrollment has a schedule, but the upgrade deadline should be None
         self.assertIsNone(enrollment.schedule.upgrade_deadline)
@@ -713,9 +717,10 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
         """ Runs through every combination of org-level plus course-level DynamicUpgradeDeadlineConfiguration enabled
         and opt-out states to verify that course-level overrides the org-level config. """
         course = create_self_paced_course_run(days_till_start=-1, org_id='TestOrg')
+        course_overview = CourseOverview.load_from_module_store(course.id)
         DynamicUpgradeDeadlineConfiguration.objects.create(enabled=True)
         if enroll_first:
-            enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course__self_paced=True)
+            enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
         OrgDynamicUpgradeDeadlineConfiguration.objects.create(
             enabled=org_config_enabled, opt_out=org_config_opt_out, org_id=course.id.org
         )
@@ -723,7 +728,7 @@ class TestScheduleOverrides(SharedModuleStoreTestCase):
             enabled=course_config_enabled, opt_out=course_config_opt_out, course_id=course.id
         )
         if not enroll_first:
-            enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course__self_paced=True)
+            enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
 
         # The enrollment has a schedule, and the upgrade_deadline is set when expected_dynamic_deadline is True
         if not enroll_first:

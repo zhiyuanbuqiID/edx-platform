@@ -1686,9 +1686,12 @@ class CourseEnrollment(models.Model):
         """
         if not self._course_overview:
             try:
-                self._course_overview = CourseOverview.get_from_id(self.course_id)
-            except (CourseOverview.DoesNotExist, IOError):
-                self._course_overview = None
+                self._course_overview = self.course
+            except CourseOverview.DoesNotExist:
+                try:
+                    self._course_overview = CourseOverview.get_from_id(self.course_id)
+                except (CourseOverview.DoesNotExist, IOError):
+                    self._course_overview = None
         return self._course_overview
 
     @cached_property
@@ -1718,6 +1721,10 @@ class CourseEnrollment(models.Model):
             # Replicate that behavior here by returning None if the personalized deadline is in the past.
             if datetime.now(UTC) >= self.dynamic_upgrade_deadline:
                 return None
+
+            if self.course_overview.get_course_mode(CourseMode.VERIFIED) is None:
+                return None
+
             return self.dynamic_upgrade_deadline
 
         return self.course_upgrade_deadline
@@ -1733,12 +1740,7 @@ class CourseEnrollment(models.Model):
         Returns:
             datetime|None
         """
-        try:
-            course_overview = self.course
-        except CourseOverview.DoesNotExist:
-            course_overview = self.course_overview
-
-        if not course_overview.self_paced:
+        if not self.course_overview.self_paced:
             return None
 
         if not DynamicUpgradeDeadlineConfiguration.is_enabled():

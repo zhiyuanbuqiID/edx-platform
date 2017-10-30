@@ -148,6 +148,8 @@ class BinnedSchedulesBaseResolver(PrefixedDebugLoggerMixin, RecipientResolver):
             # This will run the query and cache all of the results in memory.
             num_schedules = len(schedules)
 
+        LOG.debug('Number of schedules = %d', num_schedules)
+
         # This should give us a sense of the volume of data being processed by each task.
         set_custom_metric('num_schedules', num_schedules)
 

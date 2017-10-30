@@ -652,6 +652,15 @@ class CourseOverview(TimeStampedModel):
 
         return urlunparse((None, base_url, path, params, query, fragment))
 
+    def get_course_mode(self, mode_slug):
+        # In some code paths, the modes have been prefetched. Instead of calling get() directly here, which will
+        # miss the cache, instead just iterate through the list of prefetched modes and find the verified mode.
+        for mode in self.modes.all():
+            if mode.mode_slug == mode_slug:
+                return mode
+
+        return None
+
     def __unicode__(self):
         """Represent ourselves with the course key."""
         return unicode(self.id)
