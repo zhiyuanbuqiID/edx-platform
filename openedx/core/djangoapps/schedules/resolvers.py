@@ -77,7 +77,7 @@ class BinnedSchedulesBaseResolver(PrefixedDebugLoggerMixin, RecipientResolver):
 
     schedule_date_field = None
     num_bins = DEFAULT_NUM_BINS
-    experience_filter = Q(experience=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
+    experience_filter = Q(experience__experience_type=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
 
     def __attrs_post_init__(self):
         # TODO: in the next refactor of this task, pass in current_datetime instead of reproducing it here
@@ -241,9 +241,9 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
     def experience_filter(self):
         if self.day_offset == -3:
             experiences = [ScheduleExperience.DEFAULT, ScheduleExperience.COURSE_UPDATES]
-            return Q(experience__in=experiences) | Q(experience__isnull=True)
+            return Q(experience__experience_type__in=experiences) | Q(experience__isnull=True)
         else:
-            return Q(experience=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
+            return Q(experience__experience_type=ScheduleExperience.DEFAULT) | Q(experience__isnull=True)
 
     def get_template_context(self, user, user_schedules):
         first_schedule = user_schedules[0]
@@ -346,7 +346,7 @@ class CourseUpdateResolver(BinnedSchedulesBaseResolver):
     log_prefix = 'Course Update'
     schedule_date_field = 'start'
     num_bins = COURSE_UPDATE_NUM_BINS
-    experience_filter = Q(experience=ScheduleExperience.COURSE_UPDATES)
+    experience_filter = Q(experience__experience_type=ScheduleExperience.COURSE_UPDATES)
 
     def schedules_for_bin(self):
         week_num = abs(self.day_offset) / 7
