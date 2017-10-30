@@ -64,7 +64,9 @@ class BinnedSchedulesBaseResolver(PrefixedDebugLoggerMixin, RecipientResolver):
                                relative to. For example, if this resolver finds schedules that started 7 days ago
                                this variable should be set to "start".
         num_bins -- the int number of bins to split the users into
-        experience_type -- the string name for the experience type that users will be filtered to
+        experience_filter -- a queryset filter used to select only the users who should be getting this message as part
+                             of their experience. This defaults to users without a specified experience type and those
+                             in the "recurring nudges and upgrade reminder" experience.
     """
     async_send_task = attr.ib()
     site = attr.ib()
