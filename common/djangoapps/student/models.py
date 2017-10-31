@@ -1688,6 +1688,7 @@ class CourseEnrollment(models.Model):
             try:
                 self._course_overview = self.course
             except CourseOverview.DoesNotExist:
+                log.info('Course Overviews: unable to find course overview for enrollment, loading from modulestore.')
                 try:
                     self._course_overview = CourseOverview.get_from_id(self.course_id)
                 except (CourseOverview.DoesNotExist, IOError):

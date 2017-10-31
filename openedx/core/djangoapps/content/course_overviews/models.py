@@ -653,6 +653,12 @@ class CourseOverview(TimeStampedModel):
         return urlunparse((None, base_url, path, params, query, fragment))
 
     def get_course_mode(self, mode_slug):
+        """
+        Find the specified mode associated with this course.
+
+        Returns:
+            The course mode if available, or
+        """
         # In some code paths, the modes have been prefetched. Instead of calling get() directly here, which will
         # miss the cache, instead just iterate through the list of prefetched modes and find the verified mode.
         for mode in self.modes.all():

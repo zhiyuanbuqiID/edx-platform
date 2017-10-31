@@ -27,11 +27,9 @@ class CreateScheduleTests(SharedModuleStoreTestCase):
 
     def assert_schedule_created(self, experience_type=ScheduleExperience.DEFAULT):
         course = _create_course_run(self_paced=True)
-        course_overview = CourseOverview.load_from_module_store(course.id)
         enrollment = CourseEnrollmentFactory(
             course_id=course.id,
             mode=CourseMode.AUDIT,
-            course=course_overview,
         )
         self.assertIsNotNone(enrollment.schedule)
         self.assertIsNone(enrollment.schedule.upgrade_deadline)
@@ -39,11 +37,9 @@ class CreateScheduleTests(SharedModuleStoreTestCase):
 
     def assert_schedule_not_created(self):
         course = _create_course_run(self_paced=True)
-        course_overview = CourseOverview.load_from_module_store(course.id)
         enrollment = CourseEnrollmentFactory(
             course_id=course.id,
             mode=CourseMode.AUDIT,
-            course=course_overview,
         )
         with self.assertRaises(Schedule.DoesNotExist):
             enrollment.schedule
@@ -124,9 +120,8 @@ class UpdateScheduleTests(SharedModuleStoreTestCase):
         mock_get_current_site.return_value = self.site
 
         course = _create_course_run(self_paced=True, start_day_offset=5)  # course starts in future
-        course_overview = CourseOverview.load_from_module_store(course.id)
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
-        self.assert_schedule_dates(enrollment.schedule, enrollment.course_overview.start)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        self.assert_schedule_dates(enrollment.schedule, enrollment.course.start)
 
         course.start = course.start + datetime.timedelta(days=3)  # new course start changes to another future date
         self.store.update_item(course, ModuleStoreEnum.UserID.test)
@@ -137,8 +132,7 @@ class UpdateScheduleTests(SharedModuleStoreTestCase):
         mock_get_current_site.return_value = self.site
 
         course = _create_course_run(self_paced=True, start_day_offset=-5)  # course starts in past
-        course_overview = CourseOverview.load_from_module_store(course.id)
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
         self.assert_schedule_dates(enrollment.schedule, enrollment.created)
 
         course.start = course.start + datetime.timedelta(days=3)  # new course start changes to another future date
@@ -150,9 +144,8 @@ class UpdateScheduleTests(SharedModuleStoreTestCase):
         mock_get_current_site.return_value = self.site
 
         course = _create_course_run(self_paced=True, start_day_offset=5)  # course starts in future
-        course_overview = CourseOverview.load_from_module_store(course.id)
-        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT, course=course_overview)
-        previous_start = enrollment.course_overview.start
+        enrollment = CourseEnrollmentFactory(course_id=course.id, mode=CourseMode.AUDIT)
+        previous_start = enrollment.course.start
         self.assert_schedule_dates(enrollment.schedule, previous_start)
 
         course.start = course.start + datetime.timedelta(days=-10)  # new course start changes to a past date
