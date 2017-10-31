@@ -19,6 +19,8 @@ from pyquery import PyQuery as pq
 from opaque_keys import InvalidKeyError
 
 from milestones.tests.utils import MilestonesTestCaseMixin
+
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.cookies import get_user_info_cookie_data
 from student.helpers import DISABLE_UNENROLL_CERT_STATES
 from student.models import CourseEnrollment, UserProfile
@@ -305,11 +307,17 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin):
         any of marketing or social sharing urls are set.
         """
         self.course = CourseFactory.create(start=self.TOMORROW, emit_signals=True, default_store=modulestore_type)
-        self.course_enrollment = CourseEnrollmentFactory(course_id=self.course.id, user=self.user)
+        course_overview = CourseOverview.load_from_module_store(self.course.id)
+        self.course_enrollment = CourseEnrollmentFactory(
+            course_id=self.course.id,
+            user=self.user,
+            course=course_overview
+        )
         self.set_course_sharing_urls(set_marketing, set_social_sharing)
 
         # Assert course sharing icons
         response = self.client.get(reverse('dashboard'))
+        print response.content
         self.assertEqual('Share on Twitter' in response.content, set_marketing or set_social_sharing)
         self.assertEqual('Share on Facebook' in response.content, set_marketing or set_social_sharing)
 
