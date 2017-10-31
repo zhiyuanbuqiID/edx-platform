@@ -7,11 +7,15 @@ from django_comment_common.models import (
     FORUM_ROLE_STUDENT,
 )
 from xmodule.modulestore.tests.factories import CourseFactory
+from xmodule.modulestore.tests.django_utils import ModuleStoreTestCase
 
 
-class BlaTestCase(TestCase):
+class BlaTestCase(ModuleStoreTestCase):
+
     def setUp(self):
-        self.course = CourseFactory.create()
+        super(BlaTestCase, self).setUp()
+
+        self.course = CourseFactory.create(discussion_topics={'dummy discussion': {'id': 'dummy_discussion_id'}})
         self.thread_user = UserFactory(
             username='thread_user',
             password='password',
@@ -29,7 +33,7 @@ class BlaTestCase(TestCase):
         )
         CourseEnrollmentFactory(
             user=self.comment_user,
-            course_id=self.course
+            course_id=self.course.id
         )
 
         config = ForumsConfig.current()
@@ -37,9 +41,10 @@ class BlaTestCase(TestCase):
         config.save()
 
     def test_send_message(self):
+        thread_id = 'dummy_discussion_id'
         send_ace_message(
-            'thread_id',
-            'thread_user_id',
-            'comment_user_id',
-            'course_id'
+            thread_id=thread_id,
+            thread_user_id=self.thread_user.id,
+            comment_user_id=self.comment_user.id,
+            course_id=self.course.id
         )

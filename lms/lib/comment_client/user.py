@@ -136,18 +136,18 @@ class User(models.Model):
         )
 
     def is_user_subscribed_to_thread(self, thread_id):
-        # url = _url_for_user_subscribed_threads(self.id)
-        # params = {'course_id': thread_id.course_id}
-        # response = utils.perform_request(
-        #     'get',
-        #     url,
-        #     params,
-        #     metric_action='user.subscribed_threads',
-        #     metric_tags=self._metric_tags,
-        #     paged_results=True
-        # )
+        url = _url_for_user_subscribed_threads(self.id)
+        params = {'course_id': Thread.thread_id.course_id}
+        response = utils.perform_request(
+            'get',
+            url,
+            params,
+            metric_action='user.subscribed_threads',
+            metric_tags=self._metric_tags,
+            paged_results=True
+        )
 
-        subscribed_threads = self.subscribed_threads()
+        # subscribed_threads = self.subscribed_threads()
 
     def _retrieve(self, *args, **kwargs):
         url = self.url(action='get', params=self.attributes)
