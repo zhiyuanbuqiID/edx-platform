@@ -115,19 +115,8 @@ class User(models.Model):
         return response.get('collection', []), response.get('page', 1), response.get('num_pages', 1)
 
     def subscribed_threads(self, query_params={}):
-        if not self.course_id:
-            raise utils.CommentClientRequestError("Must provide course_id when retrieving subscribed threads for the user")
-        url = _url_for_user_subscribed_threads(self.id)
-        params = {'course_id': self.course_id.to_deprecated_string()}
-        params = utils.merge_dict(params, query_params)
-        response = utils.perform_request(
-            'get',
-            url,
-            params,
-            metric_action='user.subscribed_threads',
-            metric_tags=self._metric_tags,
-            paged_results=True
-        )
+        response = self._perform_subscribed_threads_request(query_params)
+
         return utils.CommentClientPaginatedResult(
             collection=response.get('collection', []),
             page=response.get('page', 1),
@@ -135,10 +124,16 @@ class User(models.Model):
             thread_count=response.get('thread_count', 0)
         )
 
-    def is_user_subscribed_to_thread(self, thread_id):
+    def is_user_subscribed_to_thread(self, course_id, thread_id):
+        return thread_id in self._perform_subscribed_threads_request(course_id=course_id)
+
+    def _perform_subscribed_threads_request(self, query_params={}):
+        if not self.course_id:
+            raise utils.CommentClientRequestError("Must provide course_id when retrieving subscribed threads for the user")
         url = _url_for_user_subscribed_threads(self.id)
-        params = {'course_id': Thread.thread_id.course_id}
-        response = utils.perform_request(
+        params = {'course_id': self.course_id.to_deprecated_string()}
+        params = utils.merge_dict(params, query_params)
+        return utils.perform_request(
             'get',
             url,
             params,
@@ -146,8 +141,6 @@ class User(models.Model):
             metric_tags=self._metric_tags,
             paged_results=True
         )
-
-        # subscribed_threads = self.subscribed_threads()
 
     def _retrieve(self, *args, **kwargs):
         url = self.url(action='get', params=self.attributes)
