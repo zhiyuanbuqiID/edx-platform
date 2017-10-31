@@ -12,6 +12,8 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test.client import Client, RequestFactory
 from django.test.utils import override_settings
+
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from util.date_utils import strftime_localized
 from mock import Mock, patch
 from nose.plugins.attrib import attr
@@ -147,6 +149,7 @@ class CommonCertificatesTestCase(ModuleStoreTestCase):
         self.course.cert_html_view_enabled = True
         self.course.save()
         self.store.update_item(self.course, self.user.id)
+        CourseOverview.load_from_module_store(self.course.id)
 
     def _create_custom_template(self, org_id=None, mode=None, course_key=None, language=None):
         """
@@ -683,6 +686,7 @@ class CertificatesViewsTests(CommonCertificatesTestCase):
         self.course.cert_html_view_enabled = True
         self.course.save()
         self.store.update_item(self.course, self.user.id)
+        CourseOverview.load_from_module_store(self.course.id)
         test_url = get_certificate_url(
             user_id=self.user.id,
             course_id=unicode(self.course.id)
@@ -729,6 +733,7 @@ class CertificatesViewsTests(CommonCertificatesTestCase):
         self.course.cert_html_view_enabled = True
         self.course.save()
         self.store.update_item(self.course, self.user.id)
+        CourseOverview.load_from_module_store(self.course.id)
 
         test_url = get_certificate_url(
             user_id=self.user.id,
@@ -903,6 +908,7 @@ class CertificatesViewsTests(CommonCertificatesTestCase):
         self.course.cert_html_view_enabled = True
         self.course.save()
         self.store.update_item(self.course, self.user.id)
+        CourseOverview.load_from_module_store(self.course.id)
 
         test_url = get_certificate_url(
             user_id=self.user.id,

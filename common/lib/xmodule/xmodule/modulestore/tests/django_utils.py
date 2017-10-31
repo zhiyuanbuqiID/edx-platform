@@ -15,6 +15,8 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.test import TestCase
 from django.test.utils import override_settings
 from mock import patch
+
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from openedx.core.djangolib.testing.utils import CacheIsolationMixin, CacheIsolationTestCase, FilteredQueryCountMixin
 from openedx.core.lib.tempdir import mkdtemp_clean
 from student.models import CourseEnrollment
@@ -549,4 +551,5 @@ class ModuleStoreTestCase(
         with self.store.branch_setting(ModuleStoreEnum.Branch.draft_preferred, course.id):
             self.store.update_item(course, user_id)
         updated_course = self.store.get_course(course.id)
+        CourseOverview.load_from_module_store(course.id)
         return updated_course
