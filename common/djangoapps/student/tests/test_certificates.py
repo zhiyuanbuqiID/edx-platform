@@ -15,6 +15,7 @@ from certificates.api import get_certificate_url  # pylint: disable=import-error
 from certificates.models import CertificateStatuses  # pylint: disable=import-error
 from certificates.tests.factories import GeneratedCertificateFactory  # pylint: disable=import-error
 from course_modes.models import CourseMode
+from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from student.models import LinkedInAddToProfileConfiguration
 from student.tests.factories import CourseEnrollmentFactory, UserFactory
 from xmodule.modulestore import ModuleStoreEnum
@@ -146,6 +147,7 @@ class CertificateDashboardMessageDisplayTest(CertificateDisplayTestBase):
         self.course.certificate_available_date = certificate_available_date
         self.course.save()
         self.store.update_item(self.course, self.USERNAME)
+        CourseOverview.load_from_module_store(self.course.id)
 
         self._check_message(certificate_available_date)
 
