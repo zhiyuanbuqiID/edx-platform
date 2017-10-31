@@ -16,7 +16,7 @@ from edx_ace.recipient import Recipient
 from edx_ace.utils.date import deserialize
 from edxmako.shortcuts import marketing_link
 from opaque_keys.edx.keys import CourseKey
-from lms.lib.comment_client.user import User as cc
+from lms.lib.comment_client.user import User as CommentClientUser
 
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 
@@ -33,7 +33,7 @@ class ResponseNotification(MessageType):
 
 @task(base=LoggedTask, routing_key=ROUTING_KEY)
 def send_ace_message(thread_id, thread_user_id, comment_user_id, course_id):
-    thread_user = cc.from_django_user(User.objects.get(id=thread_user_id))
+    thread_user = CommentClientUser.from_django_user(User.objects.get(id=thread_user_id))
 
     if thread_user.is_user_subscribed_to_thread(thread_id):
         commenting_user = User.objects.get(id=comment_user_id)
@@ -48,7 +48,7 @@ def send_ace_message(thread_id, thread_user_id, comment_user_id, course_id):
 
 def _get_course_language(course_id):
     try:
-        course_key = CourseKey.from_string(kwargs['course_id'])
+        course_key = CourseKey.from_string(course_id)
         course_overview = CourseOverview.objects.get(id=course_key)
         language = course_overview.language or DEFAULT_LANGUAGE
     except:
