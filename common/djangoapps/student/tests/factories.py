@@ -140,6 +140,8 @@ class CourseEnrollmentFactory(DjangoModelFactory):
         if 'course' not in kwargs:
             course_id = kwargs.get('course_id')
             if course_id is not None:
+                if isinstance(course_id, basestring):
+                    course_id = CourseKey.from_string(course_id)
                 course_overview = CourseOverview.get_from_id(course_id)
             else:
                 course_overview = CourseOverviewFactory(**course_kwargs)
