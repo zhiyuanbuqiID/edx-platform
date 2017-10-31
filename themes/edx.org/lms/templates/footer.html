@@ -21,10 +21,9 @@
   % endif
 >
 
-% if uses_bootstrap:
 <div class="container">
     <div class="row main-row"><!-- row -->
-        <div class="col-xl-2 col-lg-12 col-md-3 col-sm-7 col-xs-10 flex-column">
+        <div class="col-xl-2 col-lg-12 col-md-3 col-sm-7 col-xs-10 column-1 flex-column">
 
                 <div class="edx-footer-logo">
                     <a href="${marketing_link('ROOT')}">
@@ -37,12 +36,12 @@
                 <%include file="${static.get_template_path('widgets/footer-language-selector.html')}"/>
                 % endif
         </div>
-        <div class="col-xl-6 col-lg-8 col-md-9 col-sm-6 col-xs-12 flex-column">
-             <div class="row full-height">
+        <div class="col-xl-6 col-lg-8 col-md-9 col-sm-6 col-xs-12 column-2 flex-column">
+             <div class="row main-row full-height">
 
-                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 border-left ">
+                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 column-2-1 border-left ">
                     <div class="row full-height">
-                        <div class="ml-xl-0 col-lg-10 ml-lg-auto col-md-12 col-sm-10 mx-sm-auto full-height">
+                        <div class="ml-xl-0 col-lg-10 ml-lg-auto col-md-12 column-2-2 col-sm-10 mx-sm-auto full-height">
                           <ul class="list-unstyled clear-margins full-height">
                             <li class="widget-container widget_nav_menu">
                               <h3>edX</h3>
@@ -58,7 +57,7 @@
                         </div>
                     </div>
                  </div>
-                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 border-left ">
+                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 column-2-1 border-left ">
                         <div class="row full-height">
                             <div class="col-lg-12 col-md-12 col-sm-10 mx-sm-auto full-height">
                               <ul class="list-unstyled clear-margins full-height">
@@ -76,7 +75,7 @@
                             </div>
                           </div>
                 </div>
-                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 border-left ">
+                 <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-xs-12 column-2-1 border-left ">
                       <div class="row full-height">
                         <div class="col-lg-12 col-md-12 col-sm-10 mx-sm-auto full-height">
                           <ul class="list-unstyled clear-margins full-height">
@@ -111,11 +110,11 @@
 
             </div>
         </div>
-        <div class="col-xl-4 col-lg-4 col-md-9 ml-md-auto  col-sm-6 flex-column border-left">
+        <div class="col-xl-4 col-lg-4 col-md-9 ml-md-auto col-sm-6 column-3 flex-column border-left">
                 <div class="row">
-                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12 social-app-links-div">
+                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12 column-3-1 social-app-links-div">
                       <div class="row">
-                        <div class="col-lg-12 col-md-12">
+                        <div class="col-lg-12 col-md-12 column-3-2">
                              <ul class="list-inline list-unstyled social">
                                     % for link in footer['social_links']:
                                     <li>
@@ -163,88 +162,7 @@
 
 
 </div>
-% else:
 
-    <h2 class="sr footer-about-title">${_("About edX")}</h2>
-    <div class="footer-content-wrapper">
-      <div class="footer-logo">
-          <a href="${marketing_link('ROOT')}">
-            <img alt="${_('edX Home Page')}" src="${footer['logo_image']}">
-          </a>
-      </div>
-
-      <div class="site-details">
-          <nav class="site-nav" aria-label="${_("About edX")}">
-            <ul class="about-links">
-                % for link in footer["navigation_links"]:
-                <li class="list-item">
-                  <a href="${link['url']}">${link['title']}</a>
-                </li>
-                % endfor
-            </ul>
-          </nav>
-          <nav class="legal-notices" aria-label="${_("Legal")}">
-            <ul class="legal-links">
-              % for link in footer["legal_links"]:
-                <li class="list-item">
-                  <a href="${link['url']}">${link['title']}</a>
-                </li>
-              % endfor
-            </ul>
-          </nav>
-
-          % if context.get('include_language_selector', footer_language_selector_is_enabled()):
-              <%include file="${static.get_template_path('widgets/footer-language-selector.html')}"/>
-          % endif
-
-          ## \u00A9 is the copyright symbol.
-          ## \u2013 is the en-dash. It looks like a year, but it isn't.
-          <p class="copyright">${_(
-          u"\u00A9 2012\u2013{year} edX Inc.  All rights reserved except where noted.  "
-          u"EdX, Open edX and the edX and Open edX logos are registered trademarks "
-          u"or trademarks of edX Inc."
-          ).format(year=datetime.datetime.now().year)}
-          ${u" | {icp}".format(icp=getattr(settings,'ICP_LICENSE')) if getattr(settings,'ICP_LICENSE',False) else ""}
-	  </p>
-
-          ## The Open edX link may be hidden when this view is served
-          ## through an API to partner sites (such as marketing sites or blogs),
-          ## which are not technically powered by Open edX.
-          % if not hide_openedx_link:
-          <div class="openedx-link">
-            <a href="${footer['openedx_link']['url']}" title="${footer['openedx_link']['title']}">
-              <img alt="${footer['openedx_link']['title']}" src="${footer['openedx_link']['image']}" width="140">
-            </a>
-          </div>
-          % endif
-      </div>
-
-      <div class="external-links">
-        <ul class="social-media-links">
-            % for link in footer['social_links']:
-            <li class="list-item">
-                <a href="${link['url']}" class="sm-link external" title="${link['title']}" rel="noreferrer">
-                    <span class="icon fa ${link['icon-class']}" aria-hidden="true"></span>
-                    <span class="sr">${link['action']}</span>
-                </a>
-            </li>
-            % endfor
-        </ul>
-
-        <ul class="mobile-app-links">
-            % for link in footer['mobile_links']:
-            <li class="list-item">
-                <a href="${link['url']}" class="app-link external">
-                    <img alt="${link['title']}" src="${link['image']}">
-                </a>
-            </li>
-            % endfor
-        </ul>
-      </div>
-    </div>
-
-
-% endif
 
 </footer>
 
