@@ -4,7 +4,7 @@
 // overriding existing styles on the body element
 // .view-incourse scopes these rules to be specific to student being in a course
 body.view-in-course {
-  background-color: $body-bg;
+  background-color: theme-color("inverse");
 
   // courseware header
   .header-global,
