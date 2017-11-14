@@ -1021,14 +1021,6 @@ urlpatterns += [
     url(r'config/forums', ConfigurationModelCurrentAPIView.as_view(model=ForumsConfig)),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(
-        settings.PROFILE_IMAGE_BACKEND['options']['base_url'],
-        document_root=settings.PROFILE_IMAGE_BACKEND['options']['location']
-    )
-
 # UX reference templates
 urlpatterns += [
     url(r'^template/(?P<template>.+)$', openedx_debug_views.show_reference_template),
