@@ -233,6 +233,50 @@ class TestReviewFunctions(TestReviewXBlock):
         expected_h2 = 'Nothing to review'
         self.assertIn(expected_h2, response.content)
 
+    # @ddt.data(-1, 0, 1)
+    # def test_invalid_num_desired_inputs(self, num_desired):
+    #     """
+    #     Verifying that invalid inputs are rejected when trying to create the
+    #     Review XBlock
+    #     """
+    #     self.enroll_student(self.STUDENTS[0]['email'], self.STUDENTS[0]['password'], self.course_actual)
+    #     self.enroll_student(self.STUDENTS[0]['email'], self.STUDENTS[0]['password'], self.course_review)
+
+    #     with self.store.bulk_operations(self.course_actual.id, emit_signals=False):
+            # review_section_actual = ItemFactory.create(
+            #     parent=self.chapter_actual, display_name='Review Subsection'
+            # )
+            # review_unit_actual = ItemFactory.create(
+            #     parent=review_section_actual, display_name='Review Unit'
+            # )
+
+            # review_xblock_actual = ItemFactory.create(
+            #     parent=review_unit_actual,
+            #     category='review',
+            #     display_name='Review Tool',
+            #     num_desired=num_desired
+            # )
+    #     print
+    #     print review_xblock_actual
+    #     print
+    #     user = User.objects.get(email=self.STUDENTS[0]['email'])
+    #     crum.set_current_user(user)
+    #     result_urls = get_review_ids.get_problems(num_desired, self.course_actual.id)
+
+    #     print result_urls
+    #     # Loading the review section
+    #     response = self.client.get(reverse(
+    #         'courseware_section',
+    #         kwargs={
+    #             'course_id': self.course_actual.id,
+    #             'chapter': self.chapter_actual.location.name,
+    #             'section': self.review_section_actual.location.name,
+    #         }
+    #     ))
+
+    #     # print response
+    #     assertEqual('a', 'b')
+
     @ddt.data(5, 7)
     def test_too_few_review_problems(self, num_desired):
         """
