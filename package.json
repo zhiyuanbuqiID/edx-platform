@@ -4,7 +4,7 @@
   "dependencies": {
     "@edx/edx-bootstrap": "^0.4.1",
     "@edx/paragon": "^0.2.0",
-    "@edx/studio-frontend": "edx/studio-frontend.git#19e08335397b33119f99694e879385c49d40fbd0",
+    "@edx/studio-frontend": "edx/studio-frontend.git#6e99c562b9adf86194d1cb3edb7e077b2e006b55",
     "babel-core": "^6.23.0",
     "babel-loader": "^6.4.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
