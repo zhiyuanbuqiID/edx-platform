@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "dependencies": {
     "@edx/edx-bootstrap": "^0.4.1",
-    "@edx/paragon": "^0.2.0",
-    "@edx/studio-frontend": "edx/studio-frontend.git#6e99c562b9adf86194d1cb3edb7e077b2e006b55",
+    "@edx/paragon": "edx/paragon.git#516a418906de8fe941621d8d09627306d9185b17",
+    "@edx/studio-frontend": "edx/studio-frontend.git#1101043eaa2855b5083c7a42049acb10dad6bf1c",
     "babel-core": "^6.23.0",
     "babel-loader": "^6.4.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
