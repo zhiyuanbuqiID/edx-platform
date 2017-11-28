@@ -26,6 +26,8 @@ class TestReviewXBlock(SharedModuleStoreTestCase, LoginEnrollmentTestCase):
         {'email': 'learner@test.com', 'password': 'foo'},
     ]
     XBLOCK_NAMES = ['review']
+    URL_BEGINNING = settings.LMS_ROOT_URL + \
+        '/xblock/i4x://DillonX/DAD101x_review/'
 
     @classmethod
     def setUpClass(cls):
@@ -214,7 +216,7 @@ class TestReviewFunctions(TestReviewXBlock):
                 parent=review_section_actual, display_name='Review Unit'
             )
 
-            review_xblock_actual = ItemFactory.create(
+            review_xblock_actual = ItemFactory.create(  # pylint: disable=unused-variable
                 parent=review_unit_actual,
                 category='review',
                 display_name='Review Tool'
@@ -232,50 +234,6 @@ class TestReviewFunctions(TestReviewXBlock):
 
         expected_h2 = 'Nothing to review'
         self.assertIn(expected_h2, response.content)
-
-    # @ddt.data(-1, 0, 1)
-    # def test_invalid_num_desired_inputs(self, num_desired):
-    #     """
-    #     Verifying that invalid inputs are rejected when trying to create the
-    #     Review XBlock
-    #     """
-    #     self.enroll_student(self.STUDENTS[0]['email'], self.STUDENTS[0]['password'], self.course_actual)
-    #     self.enroll_student(self.STUDENTS[0]['email'], self.STUDENTS[0]['password'], self.course_review)
-
-    #     with self.store.bulk_operations(self.course_actual.id, emit_signals=False):
-            # review_section_actual = ItemFactory.create(
-            #     parent=self.chapter_actual, display_name='Review Subsection'
-            # )
-            # review_unit_actual = ItemFactory.create(
-            #     parent=review_section_actual, display_name='Review Unit'
-            # )
-
-            # review_xblock_actual = ItemFactory.create(
-            #     parent=review_unit_actual,
-            #     category='review',
-            #     display_name='Review Tool',
-            #     num_desired=num_desired
-            # )
-    #     print
-    #     print review_xblock_actual
-    #     print
-    #     user = User.objects.get(email=self.STUDENTS[0]['email'])
-    #     crum.set_current_user(user)
-    #     result_urls = get_review_ids.get_problems(num_desired, self.course_actual.id)
-
-    #     print result_urls
-    #     # Loading the review section
-    #     response = self.client.get(reverse(
-    #         'courseware_section',
-    #         kwargs={
-    #             'course_id': self.course_actual.id,
-    #             'chapter': self.chapter_actual.location.name,
-    #             'section': self.review_section_actual.location.name,
-    #         }
-    #     ))
-
-    #     # print response
-    #     assertEqual('a', 'b')
 
     @ddt.data(5, 7)
     def test_too_few_review_problems(self, num_desired):
@@ -299,7 +257,7 @@ class TestReviewFunctions(TestReviewXBlock):
                 'section': self.section1_actual.location.name,
             }
         ))
-        if num_desired > 5:
+        if num_desired > 6:
             self.client.get(reverse(
                 'courseware_section',
                 kwargs={
@@ -325,7 +283,7 @@ class TestReviewFunctions(TestReviewXBlock):
                 parent=review_section_actual, display_name='Review Unit'
             )
 
-            review_xblock_actual = ItemFactory.create(
+            review_xblock_actual = ItemFactory.create(  # pylint: disable=unused-variable
                 parent=review_unit_actual,
                 category='review',
                 display_name='Review Tool',
@@ -389,7 +347,7 @@ class TestReviewFunctions(TestReviewXBlock):
                 parent=review_section_actual, display_name='Review Unit'
             )
 
-            review_xblock_actual = ItemFactory.create(
+            review_xblock_actual = ItemFactory.create(  # pylint: disable=unused-variable
                 parent=review_unit_actual,
                 category='review',
                 display_name='Review Tool',
@@ -413,8 +371,6 @@ class TestReviewFunctions(TestReviewXBlock):
         expected_correctness_text = 'correct'
         expected_problems = ['Review Problem 1', 'Review Problem 2', 'Review Problem 3',
                              'Review Problem 4', 'Review Problem 5', 'Review Problem 6']
-        expected_url_beginning = settings.LMS_ROOT_URL + \
-            '/xblock/block-v1:DillonX/DAD101x_review/3T2017+type@problem+block@'
 
         self.assertIn(expected_header_text, response.content)
         self.assertEqual(response.content.count(expected_correctness_text), num_desired)
@@ -425,7 +381,7 @@ class TestReviewFunctions(TestReviewXBlock):
             if problem in response.content:
                 count += 1
         self.assertEqual(count, num_desired)
-        self.assertEqual(response.content.count(expected_url_beginning), num_desired)
+        self.assertEqual(response.content.count(self.URL_BEGINNING), num_desired)
 
     @ddt.data(2, 6)
     def test_review_problem_urls(self, num_desired):
@@ -466,14 +422,13 @@ class TestReviewFunctions(TestReviewXBlock):
         crum.set_current_user(user)
         result_urls = get_review_ids.get_problems(num_desired, self.course_actual.id)
 
-        url_beginning = settings.LMS_ROOT_URL + '/xblock/block-v1:DillonX/DAD101x_review/3T2017+type@problem+block@'
         expected_urls = [
-            (url_beginning + 'Problem_1', True, 0),
-            (url_beginning + 'Problem_2', True, 0),
-            (url_beginning + 'Problem_3', True, 0),
-            (url_beginning + 'Problem_4', True, 0),
-            (url_beginning + 'Problem_5', True, 0),
-            (url_beginning + 'Problem_6', True, 0)
+            (self.URL_BEGINNING + 'problem/Problem_1', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_2', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_3', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_4', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_5', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_6', True, 0)
         ]
 
         # Since the problems are randomly selected, we have to check
@@ -518,16 +473,15 @@ class TestReviewFunctions(TestReviewXBlock):
         crum.set_current_user(user)
         result_urls = get_review_ids.get_problems(num_desired, self.course_actual.id)
 
-        url_beginning = settings.LMS_ROOT_URL + '/xblock/block-v1:DillonX/DAD101x_review/3T2017+type@problem+block@'
         expected_urls = [
-            (url_beginning + 'Problem_1', True, 0),
-            (url_beginning + 'Problem_2', True, 0),
-            (url_beginning + 'Problem_3', True, 0),
-            (url_beginning + 'Problem_4', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_1', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_2', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_3', True, 0),
+            (self.URL_BEGINNING + 'problem/Problem_4', True, 0),
             # This is the unique problem when num_desired == 5
-            (url_beginning + 'Problem_6', True, 0)
+            (self.URL_BEGINNING + 'problem/Problem_6', True, 0)
         ]
-        expected_not_loaded_problem = (url_beginning + 'Problem_5', True, 0)
+        expected_not_loaded_problem = (self.URL_BEGINNING + 'problem/Problem_5', True, 0)
 
         # Since the problems are randomly selected, we have to check
         # the correct number of urls are returned.
@@ -567,7 +521,6 @@ class TestReviewFunctions(TestReviewXBlock):
         crum.set_current_user(user)
         result_url = get_review_ids.get_vertical(self.course_actual.id)
 
-        expected_url = settings.LMS_ROOT_URL + \
-            '/xblock/block-v1:DillonX/DAD101x_review/3T2017+type@vertical+block@New_Unit_1'
+        expected_url = self.URL_BEGINNING + 'vertical/New_Unit_1'
 
         self.assertEqual(result_url, expected_url)
