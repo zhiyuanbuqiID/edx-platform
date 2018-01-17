@@ -145,7 +145,7 @@ def node_prereqs_installation():
     # evinces itself as `cb_error_text` and it ought to disappear when we upgrade
     # npm to 3 or higher. TODO: clean this up when we do that.
     try:
-        sh('npm install')
+        sh('npm install --no-bin-links')
     except BuildFailure, error_text:
         if cb_error_text in error_text:
             print "npm install error detected. Retrying..."
