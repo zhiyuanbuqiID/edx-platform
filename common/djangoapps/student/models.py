@@ -2623,3 +2623,24 @@ class LogoutViewConfiguration(ConfigurationModel):
     def __unicode__(self):
         """Unicode representation of the instance. """
         return u'Logout view configuration: {enabled}'.format(enabled=self.enabled)
+
+class UserCourseInterest(models.Model):
+    """
+    Store courses in which users have indicated interest
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    course_uuid = models.UUIDField()
+    active = models.BooleanField(default=True)
+
+    class Meta(object):
+        unique_together = ('user', 'course_uuid')
+
+    @classmethod
+    def get_active_interest_course_uuids_for_user(cls, user):
+        """
+        Returns a list of course uuids for which a user has indicated interest without withdrawing said interest.
+        """
+        return cls.objects.filter(user=user).exclude(
+            active=False,
+        ).select_related('user').values('course_uuid')
