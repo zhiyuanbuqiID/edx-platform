@@ -2624,7 +2624,7 @@ class LogoutViewConfiguration(ConfigurationModel):
         """Unicode representation of the instance. """
         return u'Logout view configuration: {enabled}'.format(enabled=self.enabled)
 
-class UserCourseInterest(models.Model):
+class UserCourseBookmark(models.Model):
     """
     Store courses in which users have indicated interest
     """
@@ -2637,9 +2637,9 @@ class UserCourseInterest(models.Model):
         unique_together = ('user', 'course_uuid')
 
     @classmethod
-    def get_active_interest_course_uuids_for_user(cls, user):
+    def get_active_bookmarked_course_uuids_for_user(cls, user):
         """
-        Returns a list of course uuids for which a user has indicated interest without withdrawing said interest.
+        Returns a list of uuids for the courses a given user has bookmarked.
         """
         return cls.objects.filter(user=user).exclude(
             active=False,

@@ -45,6 +45,7 @@ from student.models import (
     CourseEnrollment,
     CourseEnrollmentAttribute,
     DashboardConfiguration,
+    UserCourseInterest,
     UserProfile
 )
 from util.milestones_helpers import get_pre_requisite_courses_not_completed
@@ -503,6 +504,12 @@ def student_dashboard(request):
             pseudo_session = get_pseudo_session_for_entitlement(course_entitlement)
             unfulfilled_entitlement_pseudo_sessions[str(course_entitlement.uuid)] = pseudo_session
 
+    # Get the courses the user has bookmarked
+    bookmarked_course_uuids = []
+    for course in UserCourseInterest.get_active_bookmarked_course_uuids_for_user(user=user):
+        bookmarked_course_uuids.append(str(course['course_uuid']))
+    
+
     # Record how many courses there are so that we can get a better
     # understanding of usage patterns on prod.
     monitoring_utils.accumulate('num_courses', len(course_enrollments))
@@ -716,6 +723,7 @@ def student_dashboard(request):
         'enrollment_message': enrollment_message,
         'redirect_message': redirect_message,
         'account_activation_messages': account_activation_messages,
+        'bookmarked_courses': bookmarked_course_uuids,
         'course_enrollments': course_enrollments,
         'course_entitlements': course_entitlements,
         'course_entitlement_available_sessions': course_entitlement_available_sessions,

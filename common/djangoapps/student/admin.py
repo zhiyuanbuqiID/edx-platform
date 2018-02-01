@@ -20,6 +20,7 @@ from student.models import (
     Registration,
     RegistrationCookieConfiguration,
     UserAttribute,
+    UserCourseInterest,
     UserProfile,
     UserTestGroup
 )
@@ -219,6 +220,15 @@ class CourseEnrollmentAllowedAdmin(admin.ModelAdmin):
 
     class Meta(object):
         model = CourseEnrollmentAllowed
+
+
+@admin.register(UserCourseInterest)
+class UserCourseInterestAdmin(admin.ModelAdmin):
+    list_display = ('uuid', 'user', 'course_uuid',)
+    search_fields = ('user', 'course_uuid',)
+
+    class Meta(object):
+        model = UserCourseInterest
 
 
 admin.site.register(UserTestGroup)
