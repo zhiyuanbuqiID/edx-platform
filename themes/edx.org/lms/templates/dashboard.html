@@ -224,21 +224,6 @@ from student.models import CourseEnrollment
       </div>
     % endif
   </section>
-  <section class="my-courses" id="bookmarked-courses">
-      <%!
-      from django.utils.translation import ugettext as _
-      %>
-      <header class="wrapper-header-courses">
-        <h2 class="header-courses">${_("Bookmarked Courses.")}</h2>
-      </header>
-      % if len(bookmarked_courses) > 0:
-        <ul class="listing-courses">
-          % for course in bookmarked_courses:
-            <li>${course}</li>
-          % endfor
-        </ul>
-      % endif
-  </section>
 </main>
 <div class="side-container">
   %if sidebar_account_activation_message:
@@ -280,7 +265,23 @@ from student.models import CourseEnrollment
           </div>
       </div>
   % endif
-
+  <section class="my-courses" id="bookmarked-courses">
+      <%!
+      from django.utils.translation import ugettext as _
+      %>
+      <header class="wrapper-header-courses">
+        <h2 class="header-courses">${_("Bookmarked Courses")}</h2>
+      </header>
+      % if len(bookmarked_courses) > 0:
+        <ul class="listing-courses">
+          % for course in bookmarked_courses:
+            <li>
+              <a href="${course['url']}">${course['title']}</a>
+            </li>
+          % endfor
+        </ul>
+      % endif
+  </section>
   % if display_sidebar_on_dashboard:
     <section class="profile-sidebar" id="profile-sidebar" role="region" aria-label="Account Status Info">
       <header class="profile">

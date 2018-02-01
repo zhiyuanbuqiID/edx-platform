@@ -58,3 +58,8 @@ urlpatterns += [
         name='password_reset_complete',
     ),
 ]
+
+# endpoint for adding a bookmarked course
+urlpatterns += [
+    url(r'^bookmark_course$', views.bookmark_course, name='bookmark_course'),
+]

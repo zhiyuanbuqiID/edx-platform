@@ -27,6 +27,7 @@ from lms.djangoapps.commerce.utils import EcommerceService  # pylint: disable=im
 from lms.djangoapps.verify_student.models import SoftwareSecurePhotoVerification  # pylint: disable=import-error
 from openedx.core.djangoapps import monitoring_utils
 from openedx.core.djangoapps.catalog.utils import (
+    get_course_title_and_marketing_url,
     get_programs,
     get_pseudo_session_for_entitlement,
     get_visible_sessions_for_entitlement
@@ -45,7 +46,7 @@ from student.models import (
     CourseEnrollment,
     CourseEnrollmentAttribute,
     DashboardConfiguration,
-    UserCourseInterest,
+    UserCourseBookmark,
     UserProfile
 )
 from util.milestones_helpers import get_pre_requisite_courses_not_completed
@@ -506,8 +507,9 @@ def student_dashboard(request):
 
     # Get the courses the user has bookmarked
     bookmarked_course_uuids = []
-    for course in UserCourseInterest.get_active_bookmarked_course_uuids_for_user(user=user):
+    for course in UserCourseBookmark.get_active_bookmarked_course_uuids_for_user(user=user):
         bookmarked_course_uuids.append(str(course['course_uuid']))
+    bookmarked_courses = [get_course_title_and_marketing_url(uuid) for uuid in bookmarked_course_uuids]
     
 
     # Record how many courses there are so that we can get a better
@@ -723,7 +725,7 @@ def student_dashboard(request):
         'enrollment_message': enrollment_message,
         'redirect_message': redirect_message,
         'account_activation_messages': account_activation_messages,
-        'bookmarked_courses': bookmarked_course_uuids,
+        'bookmarked_courses': bookmarked_courses,
         'course_enrollments': course_enrollments,
         'course_entitlements': course_entitlements,
         'course_entitlement_available_sessions': course_entitlement_available_sessions,

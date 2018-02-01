@@ -286,6 +286,48 @@ def get_course_runs_for_course(course_uuid):
     else:
         return []
 
+def get_course_title_and_marketing_url(course_uuid):
+    catalog_integration = CatalogIntegration.current()
+    response = {
+        'title': '',
+        'url': ''
+    }
+
+    if catalog_integration.is_enabled():
+        try:
+            user = catalog_integration.get_service_user()
+        except ObjectDoesNotExist:
+            logger.error(
+                'Catalog service user with username [%s] does not exist. Course title and marketing url will not be retrieved.',
+                catalog_integration.service_username,
+            )
+            return []
+
+        api = create_catalog_api_client(user)
+        cache_key = '{base}.course.{uuid}.title_and_marketing_url'.format(
+            base=catalog_integration.CACHE_KEY,
+            uuid=course_uuid
+        )
+        data = get_edx_api_data(
+            catalog_integration,
+            'courses',
+            resource_id=course_uuid,
+            api=api,
+            cache_key=cache_key if catalog_integration.is_cache_enabled else None,
+            long_term_cache=True,
+        )
+        course_runs = data.get('course_runs', [])
+        if course_runs:
+            url = course_runs[0]['marketing_url']
+        else:
+            url = ''
+        response = {
+            'title': data.get('title', ''),
+            'url': url
+        }
+        data.get('course_runs', [])
+    return response
+
 
 def get_pseudo_session_for_entitlement(entitlement):
     """

@@ -20,7 +20,7 @@ from student.models import (
     Registration,
     RegistrationCookieConfiguration,
     UserAttribute,
-    UserCourseInterest,
+    UserCourseBookmark,
     UserProfile,
     UserTestGroup
 )
@@ -222,13 +222,13 @@ class CourseEnrollmentAllowedAdmin(admin.ModelAdmin):
         model = CourseEnrollmentAllowed
 
 
-@admin.register(UserCourseInterest)
-class UserCourseInterestAdmin(admin.ModelAdmin):
+@admin.register(UserCourseBookmark)
+class UserCourseBookmarkAdmin(admin.ModelAdmin):
     list_display = ('uuid', 'user', 'course_uuid',)
     search_fields = ('user', 'course_uuid',)
 
     class Meta(object):
-        model = UserCourseInterest
+        model = UserCourseBookmark
 
 
 admin.site.register(UserTestGroup)

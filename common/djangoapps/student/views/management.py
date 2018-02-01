@@ -89,6 +89,7 @@ from student.models import (
     Registration,
     RegistrationCookieConfiguration,
     UserAttribute,
+    UserCourseBookmark,
     UserProfile,
     UserSignupSource,
     UserStanding,
@@ -1496,3 +1497,32 @@ def text_me_the_app(request):
     }
 
     return render_to_response('text-me-the-app.html', context)
+
+@require_POST
+@csrf_exempt
+def bookmark_course(request):
+    """
+    Add a course to the user's bookmarked courses.
+    """
+    msg = "Request Body: {body}".format(body=request.body)
+    log.info(msg)
+    post_data = json.loads(request.body)
+    other_msg = "Post Data: {data}".format(data=post_data)
+    log.info(other_msg)
+    user = request.user
+    course_uuid = post_data.get('course_uuid')
+    active = post_data.get('active')
+
+    if course_uuid and isinstance(active, bool):
+        try:
+            UserCourseBookmark.objects.update_or_create(user=user, course_uuid=course_uuid, active=active)
+        except Exception:
+            log.error(
+                u'An error occurred while updating course bookmark for course %s and user %s',
+                course_uuid,
+                user,
+            )
+    else:
+        log.error(u'A course uuid or active status was not included in the request.')
+    
+    return JsonResponse({"success": True}, status=200)
