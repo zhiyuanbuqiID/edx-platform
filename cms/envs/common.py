@@ -1366,6 +1366,8 @@ XBLOCK_SETTINGS = {
     }
 }
 
+STUDIO_FRONTEND_CONTAINER_URL = None
+
 ################################ Settings for Credit Course Requirements ################################
 # Initial delay used for retrying tasks.
 # Additional retries use longer delays.
