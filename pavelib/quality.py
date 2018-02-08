@@ -241,7 +241,7 @@ def _pep8_violations(report_file):
     ("system=", "s", "System to act on"),
 ])
 @timed
-def run_pep8(_options):
+def run_pep8(options):
     """
     Run pep8 on system code.
     Fail the task if any violations are found.
