@@ -13,7 +13,7 @@ import textwrap
 
 from enum import Enum
 
-from xss_utils.utils import ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from xss_utils.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
 
 
 class Rules(Enum):
@@ -52,57 +52,6 @@ class Rules(Enum):
 
     def __init__(self, rule_id):
         self.rule_id = rule_id
-
-
-class Expression(object):
-    """
-    Represents an arbitrary expression.
-
-    An expression can be any type of code snippet. It will sometimes have a
-    starting and ending delimiter, but not always.
-
-    Here are some example expressions::
-
-        ${x | n, decode.utf8}
-        <%= x %>
-        function(x)
-        "<p>" + message + "</p>"
-
-    Other details of note:
-    - Only a start_index is required for a valid expression.
-    - If end_index is None, it means we couldn't parse the rest of the
-    expression.
-    - All other details of the expression are optional, and are only added if
-    and when supplied and needed for additional checks.  They are not necessary
-    for the final results output.
-
-    """
-
-    def __init__(self, start_index, end_index=None, template=None, start_delim="", end_delim="", strings=None):
-        """
-        Init method.
-
-        Arguments:
-            start_index: the starting index of the expression
-            end_index: the index immediately following the expression, or None
-                if the expression was unparseable
-            template: optional template code in which the expression was found
-            start_delim: optional starting delimiter of the expression
-            end_delim: optional ending delimeter of the expression
-            strings: optional list of ParseStrings
-
-        """
-        self.start_index = start_index
-        self.end_index = end_index
-        self.start_delim = start_delim
-        self.end_delim = end_delim
-        self.strings = strings
-        if template is not None and self.end_index is not None:
-            self.expression = template[start_index:end_index]
-            self.expression_inner = self.expression[len(start_delim):-len(end_delim)].strip()
-        else:
-            self.expression = None
-            self.expression_inner = None
 
 
 class RuleViolation(object):
