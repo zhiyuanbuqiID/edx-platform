@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from ddt import data, ddt
 
-from scripts.xsslint.utils import StringLines
+from xsslint.utils import StringLines
 
 
 @ddt

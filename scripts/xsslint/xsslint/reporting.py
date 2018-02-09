@@ -6,8 +6,8 @@ from __future__ import print_function
 import os
 import re
 
-from scripts.xsslint.rules import Rules
-from scripts.xsslint.utils import StringLines
+from xsslint.rules import Rules
+from xsslint.utils import StringLines
 
 
 class RuleViolation(object):

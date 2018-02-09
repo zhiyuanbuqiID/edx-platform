@@ -9,10 +9,10 @@ from unittest import TestCase
 
 import mock
 
-from scripts.xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
-from scripts.xsslint.main import _lint
-from scripts.xsslint.reporting import SummaryResults
-from scripts.xsslint.rules import Rules
+from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.main import _lint
+from xsslint.reporting import SummaryResults
+from xsslint.rules import Rules
 
 
 class TestXSSLinter(TestCase):
@@ -29,7 +29,7 @@ class TestXSSLinter(TestCase):
         self.patch_is_valid_directory(UnderscoreTemplateLinter)
         self.patch_is_valid_directory(PythonLinter)
 
-        patcher = mock.patch('scripts.xsslint.main.is_skip_dir', return_value=False)
+        patcher = mock.patch('xsslint.main.is_skip_dir', return_value=False)
         patcher.start()
         self.addCleanup(patcher.stop)
 

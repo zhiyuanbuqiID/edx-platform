@@ -9,10 +9,10 @@ from unittest import TestCase
 
 from ddt import data, ddt
 
-from scripts.xsslint.reporting import FileResults
-from scripts.xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
-from scripts.xsslint.rules import Rules
-from scripts.xsslint.utils import ParseString
+from xsslint.reporting import FileResults
+from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from xsslint.rules import Rules
+from xsslint.utils import ParseString
 
 
 class TestLinter(TestCase):

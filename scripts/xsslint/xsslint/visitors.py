@@ -4,9 +4,9 @@ Custom AST NodeVisitor classes uses for Python xss linting.
 import ast
 import re
 
-from scripts.xsslint.reporting import ExpressionRuleViolation
-from scripts.xsslint.rules import Rules
-from scripts.xsslint.utils import Expression, ParseString, StringLines
+from xsslint.reporting import ExpressionRuleViolation
+from xsslint.rules import Rules
+from xsslint.utils import Expression, ParseString, StringLines
 
 
 class BaseVisitor(ast.NodeVisitor):
