@@ -1,12 +1,14 @@
 """
 Linter classes containing logic for checking various filetypes.
 """
+import ast
 import os
 import re
 
 from scripts.xss_utils.reporting import ExpressionRuleViolation, FileResults
 from scripts.xss_utils.rules import Rules
 from scripts.xss_utils.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from scripts.xss_utils.visitors import AllNodeVisitor, OuterFormatVisitor
 
 
 class BaseLinter(object):
@@ -679,4 +681,169 @@ class JavaScriptLinter(BaseLinter):
         if last_expression is not None:
             results.violations.append(ExpressionRuleViolation(
                 rule, last_expression
+            ))
+
+
+class PythonLinter(BaseLinter):
+    """
+    The linter for Python files.
+
+    The current implementation of the linter does naive Python parsing. It does
+    not use the parser. One known issue is that parsing errors found inside a
+    docstring need to be disabled, rather than being automatically skipped.
+    Skipping docstrings is an enhancement that could be added.
+    """
+
+    LINE_COMMENT_DELIM = "#"
+
+    def __init__(self):
+        """
+        Init method.
+        """
+        super(PythonLinter, self).__init__()
+        self._skip_python_dirs = SKIP_DIRS + ('tests', 'test/acceptance')
+
+    def process_file(self, directory, file_name):
+        """
+        Process file to determine if it is a Python file and
+        if it is safe.
+
+        Arguments:
+            directory (string): The directory of the file to be checked
+            file_name (string): A filename for a potential Python file
+
+        Returns:
+            The file results containing any violations.
+
+        """
+        file_full_path = os.path.normpath(directory + '/' + file_name)
+        results = FileResults(file_full_path)
+
+        if not results.is_file:
+            return results
+
+        if file_name.lower().endswith('.py') is False:
+            return results
+
+        # skip tests.py files
+        # TODO: Add configuration for files and paths
+        if file_name.lower().endswith('tests.py'):
+            return results
+
+        # skip this linter code (i.e. xss_linter.py)
+        if file_name == os.path.basename(__file__):
+            return results
+
+        if not self._is_valid_directory(self._skip_python_dirs, directory):
+            return results
+
+        return self._load_and_check_file_is_safe(file_full_path, self.check_python_file_is_safe, results)
+
+    def check_python_file_is_safe(self, file_contents, results):
+        """
+        Checks for violations in a Python file.
+
+        Arguments:
+            file_contents: The contents of the Python file.
+            results: A file results objects to which violations will be added.
+
+        """
+        root_node = self.parse_python_code(file_contents, results)
+        self.check_python_code_is_safe(file_contents, root_node, results)
+        # Check rules specific to .py files only
+        # Note that in template files, the scope is different, so you can make
+        # different assumptions.
+        if root_node is not None:
+            # check format() rules that can be run on outer-most format() calls
+            visitor = OuterFormatVisitor(file_contents, results)
+            visitor.visit(root_node)
+        results.prepare_results(file_contents, line_comment_delim=self.LINE_COMMENT_DELIM)
+
+    def check_python_code_is_safe(self, python_code, root_node, results):
+        """
+        Checks for violations in Python code snippet. This can also be used for
+        Python that appears in files other than .py files, like in templates.
+
+        Arguments:
+            python_code: The contents of the Python code.
+            root_node: The root node of the Python code parsed by AST.
+            results: A file results objects to which violations will be added.
+
+        """
+        if root_node is not None:
+            # check illegal concatenation and interpolation
+            visitor = AllNodeVisitor(python_code, results)
+            visitor.visit(root_node)
+        # check rules parse with regex
+        self._check_custom_escape(python_code, results)
+
+    def parse_python_code(self, python_code, results):
+        """
+        Parses Python code.
+
+        Arguments:
+            python_code: The Python code to be parsed.
+
+        Returns:
+            The root node that was parsed, or None for SyntaxError.
+
+        """
+        python_code = self._strip_file_encoding(python_code)
+        try:
+            return ast.parse(python_code)
+
+        except SyntaxError as e:
+            if e.offset is None:
+                expression = Expression(0)
+            else:
+                lines = StringLines(python_code)
+                line_start_index = lines.line_number_to_start_index(e.lineno)
+                expression = Expression(line_start_index + e.offset)
+            results.violations.append(ExpressionRuleViolation(
+                Rules.python_parse_error, expression
+            ))
+            return None
+
+    def _strip_file_encoding(self, file_contents):
+        """
+        Removes file encoding from file_contents because the file was already
+        read into Unicode, and the AST parser complains.
+
+        Arguments:
+            file_contents: The Python file contents.
+
+        Returns:
+            The Python file contents with the encoding stripped.
+        """
+        # PEP-263 Provides Regex for Declaring Encoding
+        # Example: -*- coding: <encoding name> -*-
+        # This is only allowed on the first two lines, and it must be stripped
+        # before parsing, because we have already read into Unicode and the
+        # AST parser complains.
+        encoding_regex = re.compile(r"^[ \t\v]*#.*?coding[:=][ \t]*([-_.a-zA-Z0-9]+)")
+        encoding_match = encoding_regex.search(file_contents)
+        # If encoding comment not found on first line, search second line.
+        if encoding_match is None:
+            lines = StringLines(file_contents)
+            if lines.line_count() >= 2:
+                encoding_match = encoding_regex.search(lines.line_number_to_line(2))
+        # If encoding was found, strip it
+        if encoding_match is not None:
+            file_contents = file_contents.replace(encoding_match.group(), '#', 1)
+        return file_contents
+
+    def _check_custom_escape(self, file_contents, results):
+        """
+        Checks for custom escaping calls, rather than using a standard escaping
+        method.
+
+        Arguments:
+            file_contents: The contents of the Python file
+            results: A list of results into which violations will be added.
+
+        """
+        for match in re.finditer("(<.*&lt;|&lt;.*<)", file_contents):
+            expression = Expression(match.start(), match.end())
+            results.violations.append(ExpressionRuleViolation(
+                Rules.python_custom_escape, expression
             ))
