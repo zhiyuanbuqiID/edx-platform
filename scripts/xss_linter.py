@@ -6,9 +6,9 @@ import argparse
 import os
 import sys
 
-from scripts.xss_utils.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
-from scripts.xss_utils.reporting import SummaryResults
-from scripts.xss_utils.utils import is_skip_dir, SKIP_DIRS
+from scripts.xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from scripts.xsslint.reporting import SummaryResults
+from scripts.xsslint.utils import is_skip_dir, SKIP_DIRS
 
 
 def _process_file(full_path, template_linters, options, summary_results, out):

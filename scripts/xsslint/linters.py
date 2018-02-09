@@ -6,10 +6,10 @@ import os
 import re
 import textwrap
 
-from scripts.xss_utils.reporting import ExpressionRuleViolation, FileResults, RuleViolation
-from scripts.xss_utils.rules import Rules
-from scripts.xss_utils.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
-from scripts.xss_utils.visitors import AllNodeVisitor, HtmlStringVisitor, OuterFormatVisitor
+from scripts.xsslint.reporting import ExpressionRuleViolation, FileResults, RuleViolation
+from scripts.xsslint.rules import Rules
+from scripts.xsslint.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from scripts.xsslint.visitors import AllNodeVisitor, HtmlStringVisitor, OuterFormatVisitor
 
 
 class BaseLinter(object):

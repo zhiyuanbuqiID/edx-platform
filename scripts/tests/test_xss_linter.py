@@ -10,9 +10,9 @@ from unittest import TestCase
 import mock
 
 from scripts.xss_linter import _lint
-from scripts.xss_utils.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
-from scripts.xss_utils.reporting import SummaryResults
-from scripts.xss_utils.rules import Rules
+from scripts.xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from scripts.xsslint.reporting import SummaryResults
+from scripts.xsslint.rules import Rules
 
 
 class TestXSSLinter(TestCase):
