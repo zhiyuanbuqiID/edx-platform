@@ -141,6 +141,8 @@ case "$TEST_SUITE" in
         # Need to create an empty test result so the post-build
         # action doesn't fail the build.
         emptyxunit "quality"
+        echo 'test'
+        echo $EXIT
         exit $EXIT
         ;;
 
