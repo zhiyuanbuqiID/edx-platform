@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Tests for xss_linter.py
+Tests for main.py
 """
 import re
 import textwrap
@@ -9,8 +9,8 @@ from unittest import TestCase
 
 import mock
 
-from scripts.xss_linter import _lint
 from scripts.xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
+from scripts.xsslint.main import _lint
 from scripts.xsslint.reporting import SummaryResults
 from scripts.xsslint.rules import Rules
 
@@ -29,7 +29,7 @@ class TestXSSLinter(TestCase):
         self.patch_is_valid_directory(UnderscoreTemplateLinter)
         self.patch_is_valid_directory(PythonLinter)
 
-        patcher = mock.patch('scripts.xss_linter.is_skip_dir', return_value=False)
+        patcher = mock.patch('scripts.xsslint.main.is_skip_dir', return_value=False)
         patcher.start()
         self.addCleanup(patcher.stop)
 
@@ -54,7 +54,7 @@ class TestXSSLinter(TestCase):
         summary_results = SummaryResults()
 
         _lint(
-            'scripts/tests/templates',
+            'scripts/xsslint/tests/templates',
             template_linters=[MakoTemplateLinter(), UnderscoreTemplateLinter(), JavaScriptLinter(), PythonLinter()],
             options={
                 'list_files': False,
@@ -96,7 +96,7 @@ class TestXSSLinter(TestCase):
         summary_results = SummaryResults()
 
         _lint(
-            'scripts/tests/templates',
+            'scripts/xsslint/tests/templates',
             template_linters=[MakoTemplateLinter(), UnderscoreTemplateLinter(), JavaScriptLinter(), PythonLinter()],
             options={
                 'list_files': False,
@@ -130,7 +130,7 @@ class TestXSSLinter(TestCase):
         summary_results = SummaryResults()
 
         _lint(
-            'scripts/tests/templates',
+            'scripts/xsslint/tests/templates',
             template_linters=[MakoTemplateLinter(), UnderscoreTemplateLinter(), JavaScriptLinter(), PythonLinter()],
             options={
                 'list_files': False,
@@ -157,7 +157,7 @@ class TestXSSLinter(TestCase):
         summary_results = SummaryResults()
 
         _lint(
-            'scripts/tests/templates',
+            'scripts/xsslint/tests/templates',
             template_linters=[MakoTemplateLinter(), UnderscoreTemplateLinter(), JavaScriptLinter(), PythonLinter()],
             options={
                 'list_files': True,
