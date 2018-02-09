@@ -3,7 +3,7 @@ Linter classes containing logic for checking various filetypes.
 """
 import re
 
-from xss_utils.utils import ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from scripts.xss_utils.utils import ParseString, StringLines, is_skip_dir, SKIP_DIRS
 
 
 class BaseLinter(object):

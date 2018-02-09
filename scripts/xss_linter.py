@@ -11,10 +11,10 @@ import re
 import sys
 import textwrap
 
-from xss_utils.linters import BaseLinter
-from xss_utils.reporting import ExpressionRuleViolation, FileResults, RuleViolation, SummaryResults
-from xss_utils.rules import Rules
-from xss_utils.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from scripts.xss_utils.linters import BaseLinter
+from scripts.xss_utils.reporting import ExpressionRuleViolation, FileResults, RuleViolation, SummaryResults
+from scripts.xss_utils.rules import Rules
+from scripts.xss_utils.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
 
 
 class UnderscoreTemplateLinter(BaseLinter):
