@@ -11,17 +11,15 @@ import mock
 from ddt import data, ddt
 
 from scripts.xss_linter import (
-    FileResults,
     JavaScriptLinter,
     MakoTemplateLinter,
     PythonLinter,
-    Rules,
-    SummaryResults,
     UnderscoreTemplateLinter,
     _lint
 )
+from scripts.xss_utils.reporting import FileResults, SummaryResults
+from scripts.xss_utils.rules import Rules
 from scripts.xss_utils.utils import ParseString
-
 
 
 class TestLinter(TestCase):
