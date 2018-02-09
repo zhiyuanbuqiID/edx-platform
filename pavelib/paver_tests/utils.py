@@ -79,7 +79,7 @@ def fail_on_eslint(*args):
 def fail_on_pylint(*args):
     """
     For our tests, we need the call for diff-quality running pylint reports
-    to fail, since that is what is going to fail when we pass in a 
+    to fail, since that is what is going to fail when we pass in a
     percentage ("p") requirement.
     """
     if "pylint" in args[0]:
