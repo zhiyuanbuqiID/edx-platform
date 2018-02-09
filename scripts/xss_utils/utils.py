@@ -210,3 +210,107 @@ class StringLines(object):
         Gets the number of lines in the string.
         """
         return len(self._line_start_indexes)
+
+
+class ParseString(object):
+    """
+    ParseString is the result of parsing a string out of a template.
+
+    A ParseString has the following attributes:
+        start_index: The index of the first quote, or None if none found
+        end_index: The index following the closing quote, or None if
+            unparseable
+        quote_length: The length of the quote.  Could be 3 for a Python
+            triple quote.  Or None if none found.
+        string: the text of the parsed string, or None if none found.
+        string_inner: the text inside the quotes of the parsed string, or None
+            if none found.
+
+    """
+
+    def __init__(self, template, start_index, end_index):
+        """
+        Init method.
+
+        Arguments:
+            template: The template to be searched.
+            start_index: The start index to search.
+            end_index: The end index to search before.
+
+        """
+        self.end_index = None
+        self.quote_length = None
+        self.string = None
+        self.string_inner = None
+        self.start_index = self._find_string_start(template, start_index, end_index)
+        if self.start_index is not None:
+            result = self._parse_string(template, self.start_index)
+            if result is not None:
+                self.end_index = result['end_index']
+                self.quote_length = result['quote_length']
+                self.string = result['string']
+                self.string_inner = result['string_inner']
+
+    def _find_string_start(self, template, start_index, end_index):
+        """
+        Finds the index of the end of start of a string.  In other words, the
+        first single or double quote.
+
+        Arguments:
+            template: The template to be searched.
+            start_index: The start index to search.
+            end_index: The end index to search before.
+
+        Returns:
+            The start index of the first single or double quote, or None if no
+            quote was found.
+        """
+        quote_regex = re.compile(r"""['"]""")
+        start_match = quote_regex.search(template, start_index, end_index)
+        if start_match is None:
+            return None
+        else:
+            return start_match.start()
+
+    def _parse_string(self, template, start_index):
+        """
+        Finds the indices of a string inside a template.
+
+        Arguments:
+            template: The template to be searched.
+            start_index: The start index of the open quote.
+
+        Returns:
+            A dict containing the following, or None if not parseable:
+                end_index: The index following the closing quote
+                quote_length: The length of the quote.  Could be 3 for a Python
+                    triple quote.
+                string: the text of the parsed string
+                string_inner: the text inside the quotes of the parsed string
+
+        """
+        quote = template[start_index]
+        if quote not in ["'", '"']:
+            raise ValueError("start_index must refer to a single or double quote.")
+        triple_quote = quote * 3
+        if template.startswith(triple_quote, start_index):
+            quote = triple_quote
+
+        next_start_index = start_index + len(quote)
+        while True:
+            quote_end_index = template.find(quote, next_start_index)
+            backslash_index = template.find("\\", next_start_index)
+            if quote_end_index < 0:
+                return None
+            if 0 <= backslash_index < quote_end_index:
+                next_start_index = backslash_index + 2
+            else:
+                end_index = quote_end_index + len(quote)
+                quote_length = len(quote)
+                string = template[start_index:end_index]
+                return {
+                    'end_index': end_index,
+                    'quote_length': quote_length,
+                    'string': string,
+                    'string_inner': string[quote_length:-quote_length],
+                }

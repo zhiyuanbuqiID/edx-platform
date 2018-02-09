@@ -14,13 +14,14 @@ from scripts.xss_linter import (
     FileResults,
     JavaScriptLinter,
     MakoTemplateLinter,
-    ParseString,
     PythonLinter,
     Rules,
     SummaryResults,
     UnderscoreTemplateLinter,
     _lint
 )
+from scripts.xss_utils.utils import ParseString
+
 
 
 class TestLinter(TestCase):
