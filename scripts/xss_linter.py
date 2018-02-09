@@ -13,7 +13,7 @@ import textwrap
 
 from enum import Enum
 
-from xss_linter.utils import is_skip_dir, SKIP_DIRS
+from xss_utils.utils import is_skip_dir, SKIP_DIRS
 
 
 class StringLines(object):

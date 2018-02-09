@@ -107,7 +107,7 @@ class TestXSSLinter(TestCase):
         self.patch_is_valid_directory(UnderscoreTemplateLinter)
         self.patch_is_valid_directory(PythonLinter)
 
-        patcher = mock.patch('scripts.xss_linter.is_skip_dir', return_value=False)
+        patcher = mock.patch('scripts.xss_utils.is_skip_dir', return_value=False)
         patcher.start()
         self.addCleanup(patcher.stop)
 
