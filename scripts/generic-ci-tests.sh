@@ -123,7 +123,10 @@ case "$TEST_SUITE" in
                 echo "Finding fixme's and storing report..."
                 run_paver_quality find_fixme || { EXIT=1; }
                 echo "Finding pep8 violations and storing report..."
-                run_paver_quality run_pep8 || { EXIT=1; }
+		        run_paver_quality run_pep8 || { EXIT=1; }
+                echo $EXIT
+                echo 'try that'
+                run_paver_quality run_pep8 || { echo 'hey mike'  }
                 echo "Finding ESLint violations and storing report..."
                 run_paver_quality run_eslint -l $ESLINT_THRESHOLD || { EXIT=1; }
                 echo "Finding Stylelint violations and storing report..."
