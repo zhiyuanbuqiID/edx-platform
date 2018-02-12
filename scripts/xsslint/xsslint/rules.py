@@ -37,5 +37,3 @@ class Rules(Enum):
 
     def __init__(self, rule_id):
         self.rule_id = rule_id
-
-

@@ -42,5 +42,3 @@ class TestStringLines(TestCase):
         """
         lines = StringLines(data['string'])
         self.assertEqual(lines.line_number_to_line(data['line_number']), data['line'])
-
-
