@@ -12,7 +12,7 @@ SKIP_DIRS = (
     'perf_tests',
     'node_modules',
     'reports/diff_quality',
-    'scripts/tests/templates',
+    'scripts/xsslint',
     'spec',
     'test_root',
     'vendor',
