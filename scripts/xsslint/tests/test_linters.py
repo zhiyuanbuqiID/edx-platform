@@ -1063,6 +1063,7 @@ class TestMakoTemplateLinter(TestLinter):
         results = FileResults('')
 
         mako_template = textwrap.dedent("""
+            <%page expression_filter="h"/>
             ${x | n, strip_all_tags_but_br}
         """)
 
