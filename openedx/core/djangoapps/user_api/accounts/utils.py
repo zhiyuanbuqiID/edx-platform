@@ -5,7 +5,16 @@ import re
 from urlparse import urlparse
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
+from six import text_type
+
+from lms.djangoapps.completion.models import BlockCompletion
+from lms.djangoapps.completion.waffle import visual_progress_enabled
+from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from xmodule.modulestore.django import modulestore
+from openedx.core.djangoapps.theming.helpers import get_current_site, get_config_value_from_site_or_settings
+from opaque_keys.edx.keys import CourseKey
 
 
 def validate_social_link(platform_name, new_social_link):
@@ -89,3 +98,82 @@ def _is_valid_social_username(value):
     in the username.
     """
     return '/' not in value
+
+
+def retrieve_last_sitewide_block_completed(username):
+    """
+    Completion utility
+    From a string 'username' or object User retrieve
+    the last course block marked as 'completed' and construct a URL
+
+    :param username: str(username) or obj(User)
+    :return: block_lms_url
+
+    """
+    if not visual_progress_enabled:
+        return
+
+    if not isinstance(username, User):
+        userobj = User.objects.get(username=username)
+    else:
+        userobj = username
+
+    # try:
+    latest_completions_by_course = BlockCompletion.latest_blocks_completed_all_courses(userobj)
+
+    # except AttributeError:
+    #     return
+
+    known_site_configs = [
+        other_site_config.get_value('course_org_filter') for other_site_config in SiteConfiguration.objects.all()
+        if other_site_config.get_value('course_org_filter')
+        ]
+
+    current_site_configuration = get_config_value_from_site_or_settings(
+        name='course_org_filter',
+        site=get_current_site()
+    )
+
+    # courses.edx.org has no 'course_org_filter'
+    # however the courses within DO, but those entries are not found in
+    # known_site_configs, which are White Label sites
+    # This is necessary because the WL sites and courses.edx.org
+    # have the same AWS RDS mySQL instance
+    candidate_course = None
+    candidate_block_key = None
+    latest_date = None
+    # Go through dict, find latest
+    for course, [modified_date, block_key] in latest_completions_by_course.items():
+        if not current_site_configuration:
+            # This is a edx.org
+            if course.org in known_site_configs:
+                continue
+            if not latest_date or modified_date > latest_date:
+                candidate_course = course
+                candidate_block_key = block_key
+                latest_date = modified_date
+
+        else:
+            # This is a White Label site, and we should find candidates from the same site
+            if course.org != current_site_configuration:
+                # Not the same White Label, or a edx.org course
+                continue
+            if not latest_date or modified_date > latest_date:
+                candidate_course = course
+                candidate_block_key = block_key
+                latest_date = modified_date
+
+    if not candidate_course:
+        return
+
+    lms_base = SiteConfiguration.get_value_for_org(candidate_course.org, "LMS_BASE", settings.LMS_BASE)
+    item = modulestore().get_item(candidate_block_key, depth=1)
+
+    if not lms_base:
+        return
+
+    return u"//{lms_base}/courses/{course_key}/jump_to/{location}".format(
+        lms_base=lms_base,
+        course_key=text_type(item.location.course_key),
+        location=text_type(item.location),
+    )
