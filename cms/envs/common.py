@@ -43,6 +43,7 @@ from __future__ import absolute_import
 
 import imp
 import os
+import tempfile
 import sys
 from datetime import timedelta
 
@@ -325,7 +326,6 @@ GEOIPV6_PATH = REPO_ROOT / "common/static/data/geoip/GeoIPv6.dat"
 
 ############################# TEMPLATE CONFIGURATION #############################
 # Mako templating
-import tempfile
 MAKO_MODULE_DIR = os.path.join(tempfile.gettempdir(), 'mako_cms')
 MAKO_TEMPLATE_DIRS_BASE = [
     PROJECT_ROOT / 'templates',
@@ -450,10 +450,9 @@ else:
     _csrf_middleware = 'django.middleware.csrf.CsrfViewMiddleware'
 
 MIDDLEWARE_CLASSES = [
+    'openedx.core.djangoapps.monitoring_utils.middleware.MonitoringMemoryMiddleware',
     'crum.CurrentRequestUserMiddleware',
     'openedx.core.djangoapps.request_cache.middleware.RequestCache',
-
-    'openedx.core.djangoapps.monitoring_utils.middleware.MonitoringMemoryMiddleware',
 
     'openedx.core.djangoapps.header_control.middleware.HeaderControlMiddleware',
     'django.middleware.cache.UpdateCacheMiddleware',
@@ -517,6 +516,8 @@ X_FRAME_OPTIONS = 'ALLOW'
 
 # Platform for Privacy Preferences header
 P3P_HEADER = 'CP="Open EdX does not have a P3P policy."'
+
+MEMORY_GRAPH_DIRECTORY = os.path.join(tempfile.mkdtemp(prefix='memory_graphs'), 'cms_{}'.format(os.getpid()))
 
 ############# XBlock Configuration ##########
 
@@ -1130,6 +1131,9 @@ INSTALLED_APPS = [
 
     # Asset management for mako templates
     'pipeline_mako',
+
+    # Memory leak diagnostics
+    'openedx.core.djangoapps.monitoring_utils.apps.MonitoringUtilsConfig'
 ]
 
 

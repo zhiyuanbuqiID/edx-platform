@@ -32,6 +32,7 @@ Longer TODO:
 import imp
 import sys
 import os
+import tempfile
 
 import django
 from path import Path as path
@@ -542,7 +543,6 @@ OAUTH2_PROVIDER_APPLICATION_MODEL = 'oauth2_provider.Application'
 
 ################################## TEMPLATE CONFIGURATION #####################################
 # Mako templating
-import tempfile
 MAKO_MODULE_DIR = os.path.join(tempfile.gettempdir(), 'mako_lms')
 MAKO_TEMPLATE_DIRS_BASE = [
     PROJECT_ROOT / 'templates',
@@ -1349,6 +1349,8 @@ X_FRAME_OPTIONS = 'ALLOW'
 
 # Platform for Privacy Preferences header
 P3P_HEADER = 'CP="Open EdX does not have a P3P policy."'
+
+MEMORY_GRAPH_DIRECTORY = os.path.join(tempfile.mkdtemp(prefix='memory_graphs'), 'lms_{}'.format(os.getpid()))
 
 ############################### PIPELINE #######################################
 
