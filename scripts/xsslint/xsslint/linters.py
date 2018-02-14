@@ -8,7 +8,7 @@ import textwrap
 
 from xsslint.reporting import ExpressionRuleViolation, FileResults, RuleViolation
 from xsslint.rules import Rules
-from xsslint.utils import Expression, ParseString, StringLines, is_skip_dir, SKIP_DIRS
+from xsslint.utils import SKIP_DIRS, Expression, ParseString, StringLines, is_skip_dir
 from xsslint.visitors import AllNodeVisitor, HtmlStringVisitor, OuterFormatVisitor
 
 

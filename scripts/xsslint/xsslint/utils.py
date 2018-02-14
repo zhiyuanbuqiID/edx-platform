@@ -3,7 +3,6 @@ Utility classes/functions for the XSS Linter.
 """
 import re
 
-
 SKIP_DIRS = (
     '.git',
     '.pycharm_helpers',

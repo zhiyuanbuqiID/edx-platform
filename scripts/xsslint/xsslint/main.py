@@ -7,7 +7,7 @@ import sys
 
 from xsslint.linters import JavaScriptLinter, MakoTemplateLinter, PythonLinter, UnderscoreTemplateLinter
 from xsslint.reporting import SummaryResults
-from xsslint.utils import is_skip_dir, SKIP_DIRS
+from xsslint.utils import SKIP_DIRS, is_skip_dir
 
 
 def _process_file(full_path, template_linters, options, summary_results, out):
