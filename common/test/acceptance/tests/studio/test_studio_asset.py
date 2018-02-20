@@ -170,4 +170,4 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         # Upload the files
         upload_new_file(self.asset_page, file_names)
         # Assert that the files have been uploaded.
-        self.assertEqual(file_names, self.asset_page.asset_files_names)
+        self.assertEqual(file_names[::-1], self.asset_page.asset_files_names)
