@@ -8,6 +8,7 @@ import urllib
 from bok_choy.javascript import wait_for_js
 from opaque_keys.edx.locator import CourseLocator
 
+from common.test.acceptance.pages.common.utils import click_css
 from common.test.acceptance.pages.studio import BASE_URL
 from common.test.acceptance.pages.studio.course_page import CoursePage
 
@@ -121,7 +122,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         Returns:
             list: Uploaded files.
         """
-        # import pudb; pudb.set_trace()
         return self.q(css='.table-responsive tbody tr td:nth-child(2)').text
 
     @property
@@ -182,7 +182,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         return len(self.q(css='.form-check').execute())
 
     @wait_for_js
-    def correct_filters__in_filter_element(self):
+    def correct_filters_in_filter_element(self):
         """
         """
         correct_filters = [u'Audio', u'Code', u'Document', u'Image', u'Other']
@@ -206,7 +206,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         Returns False if no filter.
         """
         self.wait_for_ajax()
-        # import pudb; pudb.set_trace()
         if self.filter_element_on_page():
             self.q(css=self.type_filter_element + ' .form-check .form-check-input').nth(filter_number).click()
             self.wait_for_ajax()

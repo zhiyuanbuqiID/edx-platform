@@ -5,6 +5,7 @@ Acceptance tests for Studio related to the asset index page.
 from common.test.acceptance.fixtures.base import StudioApiLoginError
 from common.test.acceptance.fixtures.config import ConfigModelFixture
 from common.test.acceptance.pages.studio.asset_index import AssetIndexPage, AssetIndexPageStudioFrontend
+from common.test.acceptance.pages.studio.utils import upload_new_file
 from common.test.acceptance.tests.helpers import skip_if_browser
 from common.test.acceptance.tests.studio.base_studio_test import StudioCourseTest
 
@@ -162,3 +163,11 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         """
         self.asset_page.visit()
         assert self.asset_page.pagination_element_on_page() is True
+
+    def test_upload(self):
+        self.asset_page.visit()
+        file_names = [u'image.jpg', u'textbook.pdf'] # will change this to use test uploads from studio-uploads file once able to delete and start with clean slate
+        # Upload the files
+        upload_new_file(self.asset_page, file_names)
+        # Assert that the files have been uploaded.
+        self.assertEqual(file_names, self.asset_page.asset_files_names)

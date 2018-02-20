@@ -1,6 +1,9 @@
 """
 Utility methods useful for Studio page tests.
 """
+import os
+from path import Path
+
 from bok_choy.javascript import js_defined
 from bok_choy.promise import EmptyPromise
 from selenium.webdriver.common.action_chains import ActionChains
@@ -263,6 +266,31 @@ def click_studio_help(page):
 def studio_help_links(page):
     """Return the list of Studio help links in the page footer."""
     return page.q(css='.support .list-actions a').results
+
+
+def upload_new_file(page, file_names):
+    """
+    Upload file(s).
+
+    Arguments:
+        page (PageObject): Page to upload file to.
+        file_names (list): file name(s) we want to upload.
+    """
+    # file path found from CourseFixture logic
+    UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/'
+    # Make file input field visible.
+    file_input_css = 'input[type="file"]'
+
+    for file_name in file_names:
+        page.q(css=file_input_css).results[0].send_keys(
+            UPLOAD_FILE_DIR + file_name)
+        page.wait_for_element_visibility(
+            '.alert', 'Upload status alert is visible.')
+    
+    # Close the upload status-alert.
+    click_css(page, '.btn.close', 0, False)
+    page.wait_for_element_invisibility(
+        '.alert', 'Status alert has been closed.')
 
 
 class HelpMixin(object):
