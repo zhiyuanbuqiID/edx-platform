@@ -164,6 +164,24 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         self.asset_page.visit()
         assert self.asset_page.pagination_element_on_page() is True
 
+    def test_lock(self):
+        """
+        Make sure clicking the lock button toggles correctly.
+        """
+        self.asset_page.visit()
+        # Verify that a file can be locked
+        self.asset_page.set_asset_lock()
+        # Get the list of locked assets, there should be one
+        locked_assets = self.asset_page.asset_lock_buttons(locked_only=True)
+        self.assertEqual(len(locked_assets), 1)
+
+        # Confirm that there are 2 assets, with the first
+        # locked and the second unlocked.
+        all_assets = self.asset_page.asset_lock_buttons(locked_only=False)
+        self.assertEqual(len(all_assets), 2)
+        self.assertTrue('fa-lock' in all_assets[0].get_attribute('class'))
+        self.assertTrue('fa-unlock' in all_assets[1].get_attribute('class'))
+
     def test_upload(self):
         self.asset_page.visit()
         file_names = [u'image.jpg', u'textbook.pdf'] # will change this to use test uploads from studio-uploads file once able to delete and start with clean slate

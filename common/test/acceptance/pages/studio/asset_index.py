@@ -237,13 +237,35 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='.pagination').present
 
-    ## assuming that we are starting with a page that has elements in it already? (based on exising test setup file)
     @wait_for_js
     def table_element_on_page(self):
         """
         Checks that table is on the page.
         """
         return self.q(css='table.table-responsive').present
+
+    def asset_lock_buttons(self, locked_only=True):
+        """
+        Return a list of WebElements of the lock buttons for assets
+        or an empty list if there are none.
+        """
+        if locked_only:
+            css = ".table-responsive tbody tr td:nth-child(7) button.fa-lock"
+        else:
+            css = ".table-responsive tbody tr td:nth-child(7) button"
+
+        return self.q(css=css).execute()
+
+    def set_asset_lock(self, index=0):
+        """
+        Set the state of the asset in the row specified by index
+         to locked or unlocked by clicking the button.
+        Note: this will raise an IndexError if the row does not exist
+        """
+        lock_button = self.q(css=".table-responsive tbody tr td:nth-child(7) button").execute()[index]
+        lock_button.click()
+        # Click initiates an ajax call, waiting for it to complete
+        self.wait_for_ajax()
 
     def return_results_set(self):
         """
