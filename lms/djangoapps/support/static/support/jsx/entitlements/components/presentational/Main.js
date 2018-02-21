@@ -4,8 +4,9 @@ import SearchContainer from '../container/SearchContainer';
 import EntitlementModalContainer from '../container/ModalContainer'
 
 class Main extends React.Component{
-	createNewEntitlement(){
+	openCreationModal(){
 		console.log('create new entitlement')
+		this.props.openEntitlementCreationModal()
 	}
 	constructor(props){
 		super(props);
@@ -20,7 +21,7 @@ class Main extends React.Component{
 				<Button
 			        className={['btn', 'btn-primary']}
 			        label= "Create New Entitlement"
-			        onClick={this.createNewEntitlement.bind(this)}/>
+			        onClick={this.openCreationModal.bind(this)}/>
 			    <EntitlementModalContainer/>
 				{React.cloneElement(this.props.children, this.props)}
 			</div>

@@ -7,7 +7,7 @@ import EntitlementModal from '../presentational/Search';
 const mapStateToProps = (state) => {
   return {
     modalEntitlement: state.modalEntitlement,
-    modalOpen: state.modalOpen
+    modal: state.modal
   };
 }
 

@@ -12,24 +12,29 @@ export function requestEntitlements(email, username, course_key) {
   );
 }
 
-export function createEntitlement(email, username, course_key) {
+export function createEntitlement(course_uuid, user, mode, reason, comments) {
   return fetch(
     `${endpoints.entitlementList}/?username_or_email=${email}`, {
       credentials: 'same-origin',
       method: 'post',
-      body:{}
+      body:{
+        course_uuid: entitlement_uuid,
+        user: user,
+        mode: mode,
+        reason: reason,
+        comments: comments}
     },
   );
 }
 
-export function updateEntitlement(reason, entitlement_uuid, comments) {
+export function updateEntitlement(entitlement_uuid, reason, comments) {
   return fetch(
     `${endpoints.entitlementList}/?username_or_email=${email}`, {
       credentials: 'same-origin',
       method: 'put',
       body:{
-      	reason: reason,
       	entitlement_uuid: entitlement_uuid,
+        reason: reason,
       	comments: comments
       }
     },

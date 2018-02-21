@@ -7,7 +7,7 @@ function mapStateToProps(state){
 	console.log('mapping state to props', state)
 	return{
 		entitlements: state.entitlements,
-		modalOpen: state.modalOpen
+		modal: state.modal
 	}
 }
 

@@ -15,7 +15,10 @@ const initial_entitlements = []//entitlements;
 //create default data
 const defaultState = {
 	entitlements: initial_entitlements,
-	modalOpen: true
+	modal: {
+    modalOpen: true,
+    activeEntitlement: {}
+  }
 }
 
 // const enhancers = compose(

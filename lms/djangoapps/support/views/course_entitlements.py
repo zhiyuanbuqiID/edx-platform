@@ -55,7 +55,7 @@ class EntitlementSupportListView(viewsets.ModelViewSet):
         try:
             user = User.objects.get(Q(username=username_or_email) | Q(email=username_or_email))
         except User.DoesNotExist:
-            return Response([])
+            return Response(['blah'])
 
         return Response(self.serializer_class(self.queryset.filter(user=user), many=True).data)
 

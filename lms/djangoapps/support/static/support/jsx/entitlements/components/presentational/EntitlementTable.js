@@ -90,7 +90,8 @@ class EntitlementTable extends React.Component{
 		super(props)
 	}
 	render(){
-    const entitlementData = this.props.entitlements.map((entitlement, index)=>{
+      console.log(this.props.entitlements)
+      const entitlementData = this.props.entitlements.map((entitlement, index)=>{
       console.log('mapping button onto entitlement ', entitlement)
       return Object.assign({}, entitlement, {
         button: <Button

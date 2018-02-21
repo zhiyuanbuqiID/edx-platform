@@ -103,16 +103,55 @@ export function updateEntitlementFailure(error){
 	}
 }
 
-export function openEntitlementReissueModal(entitlement){
+
+export function createEntitlement(course_uuid, user, mode, reason, comments){
+	console.log("fetchEntitlements action creation")
+	return dispatch => {
+		clientApi.createEntitlement(course_uuid, user, mode, reason, comments)
+		.then((response) => {
+	      if (response.ok) {
+	        return response.json();
+	      }
+	      console.log('throwing error');
+	      throw new Error(response);
+	    })
+	    .then((json) => {
+	      if (json) {
+	      	console.log('got out some json', JSON.stringify(json))
+	        return dispatch(createEntitlementSuccess(json.results));
+	      }
+	      return Promise.resolve();
+	    })
+	    .catch((error) => {
+	    	console.log('catching error');
+	      return dispatch(createEntitlementFailure(error));  
+	    });
+	}
+}
+export function createEntitlementRequest(){
 	return {
-		type:'OPEN_REISSUE_MODAL',
+		type:'UPDATE_ENTITLEMENT_REQUEST',
+	}
+}
+
+export function createEntitlementSuccess(entitlement){
+	return {
+		type:'UPDATE_ENTITLEMENT_SUCCESS',
 		entitlement
 	}
 }
 
-export function closeEntitlementReissueModal(){
+export function createEntitlementFailure(error){
 	return {
-		type:'CLOSE_REISSUE_MODAL',
+		type:'UPDATE_ENTITLEMENT_FAILURE',
+		error
+	}
+}
+
+
+export function openEntitlementReissueModal(entitlement){
+	return {
+		type:'OPEN_REISSUE_MODAL',
 		entitlement
 	}
 }
@@ -123,11 +162,10 @@ export function openEntitlementCreationModal(){
 	}
 }
 
-export function closeEntitlementCreationModal(){
+export function closeModal(){
 	return {
-		type:'CLOSE_CREATION_MODAL',
+		type:'CLOSE_MODAL',
 	}
 }
-
 
 // updateEntitlement
