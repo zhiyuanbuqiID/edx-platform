@@ -5,7 +5,6 @@ Acceptance tests for Studio related to the asset index page.
 from common.test.acceptance.fixtures.base import StudioApiLoginError
 from common.test.acceptance.fixtures.config import ConfigModelFixture
 from common.test.acceptance.pages.studio.asset_index import AssetIndexPage, AssetIndexPageStudioFrontend
-from common.test.acceptance.pages.studio.utils import upload_new_file
 from common.test.acceptance.tests.helpers import skip_if_browser
 from common.test.acceptance.tests.studio.base_studio_test import StudioCourseTest
 
@@ -182,10 +181,17 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         self.assertTrue('fa-lock' in all_assets[0].get_attribute('class'))
         self.assertTrue('fa-unlock' in all_assets[1].get_attribute('class'))
 
-    def test_upload(self):
+    def test_delete_and_upload(self):
+        """
+        Upload specific files to page.
+        Start by deleting all files, to ensure starting on a blank slate.
+        """
         self.asset_page.visit()
-        file_names = [u'image.jpg', u'textbook.pdf'] # will change this to use test uploads from studio-uploads file once able to delete and start with clean slate
+        self.asset_page.delete_all_assets()
+        file_names = [u'file-0.png', u'file-13.pdf', u'file-26.js', u'file-39.txt']
         # Upload the files
-        upload_new_file(self.asset_page, file_names)
+        self.asset_page.upload_new_file(file_names)
         # Assert that the files have been uploaded.
+        all_assets = self.asset_page.asset_files_count - 1 # currently -1 because this counts header row too
+        self.assertEqual(all_assets, 4)
         self.assertEqual(file_names[::-1], self.asset_page.asset_files_names)

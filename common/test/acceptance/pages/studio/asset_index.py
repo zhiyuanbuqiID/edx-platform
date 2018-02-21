@@ -3,12 +3,13 @@ The Files and Uploads page for a course in Studio
 """
 
 import os
+from path import Path
 import urllib
 
 from bok_choy.javascript import wait_for_js
 from opaque_keys.edx.locator import CourseLocator
 
-from common.test.acceptance.pages.common.utils import click_css
+from common.test.acceptance.pages.common.utils import click_css, sync_on_notification
 from common.test.acceptance.pages.studio import BASE_URL
 from common.test.acceptance.pages.studio.course_page import CoursePage
 
@@ -132,9 +133,21 @@ class AssetIndexPageStudioFrontend(CoursePage):
         return len(self.q(css='.table-responsive tr').execute())
 
     @property
-    def asset_delete_links(self):
+    def asset_delete_buttons(self):
         """Return a list of WebElements for deleting the assets"""
         css = '.table-responsive tbody tr .fa-trash'
+        return self.q(css=css).execute()
+
+    @property
+    def asset_lock_buttons(self, locked_only=True):
+        """
+        Return a list of WebElements of the lock buttons for assets
+        or an empty list if there are none.
+        """
+        if locked_only:
+            css = ".table-responsive tbody tr td:nth-child(7) button.fa-lock"
+        else:
+            css = ".table-responsive tbody tr td:nth-child(7) button"
         return self.q(css=css).execute()
 
     @wait_for_js
@@ -244,18 +257,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='table.table-responsive').present
 
-    def asset_lock_buttons(self, locked_only=True):
-        """
-        Return a list of WebElements of the lock buttons for assets
-        or an empty list if there are none.
-        """
-        if locked_only:
-            css = ".table-responsive tbody tr td:nth-child(7) button.fa-lock"
-        else:
-            css = ".table-responsive tbody tr td:nth-child(7) button"
-
-        return self.q(css=css).execute()
-
     def set_asset_lock(self, index=0):
         """
         Set the state of the asset in the row specified by index
@@ -266,6 +267,56 @@ class AssetIndexPageStudioFrontend(CoursePage):
         lock_button.click()
         # Click initiates an ajax call, waiting for it to complete
         self.wait_for_ajax()
+        sync_on_notification(self)
+
+    def confirm_asset_deletion(self):
+        """ Click to confirm deletion and sync on the notification"""
+        confirmation_title_selector = '.modal'
+        self.q(css='.modal button.btn-primary').click()
+        # Click initiates an ajax call, waiting for it to complete
+        self.wait_for_ajax()
+        sync_on_notification(self)
+
+    def delete_first_asset(self):
+        """ Deletes file then clicks delete on confirmation """
+        self.q(css='.fa-trash').first.click()
+        self.confirm_asset_deletion()
+
+    def delete_asset_named(self, name):
+        """ Delete the asset with the specified name. """
+        names = self.asset_files_names
+        if name not in names:
+            raise LookupError('Asset with filename {} not found.'.format(name))
+        delete_buttons = self.asset_delete_buttons
+        assets = dict(zip(names, asset_delete_buttons))
+        # Now click the link in that row
+        assets.get(name).click()
+        self.confirm_asset_deletion()
+
+    def delete_all_assets(self):
+        """ Delete all uploaded assets """
+        while self.asset_files_count:
+            self.delete_first_asset()
+
+    def upload_new_file(self, file_names):
+        """
+        Upload file(s).
+
+        Arguments:
+            page (PageObject): Page to upload file to.
+            file_names (list): file name(s) we want to upload.
+        """
+        # file path found from CourseFixture logic
+        UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
+        # Make file input field visible.
+        file_input_css = 'input[type="file"]'
+
+        for file_name in file_names:
+            self.q(css=file_input_css).results[0].send_keys(
+                UPLOAD_FILE_DIR + file_name)
+        
+        self.wait_for_element_visibility(
+            '.alert', 'Upload status alert is visible.')
 
     def return_results_set(self):
         """
