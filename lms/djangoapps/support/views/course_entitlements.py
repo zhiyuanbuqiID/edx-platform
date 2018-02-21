@@ -2,14 +2,17 @@
 Support tool for changing and granting course entitlements
 """
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import DatabaseError, transaction
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.utils.decorators import method_decorator
+from django.views.generic import View
 from edx_rest_framework_extensions.authentication import JwtAuthentication
 from rest_framework import permissions, status, viewsets
 from rest_framework.response import Response
 
+from edxmako.shortcuts import render_to_response
 from entitlements.api.v1.permissions import IsAdminOrAuthenticatedReadOnly
 from entitlements.api.v1.serializers import SupportCourseEntitlementSerializer
 from entitlements.models import CourseEntitlement, CourseEntitlementSupportDetail
@@ -19,7 +22,22 @@ from openedx.core.djangoapps.cors_csrf.authentication import SessionAuthenticati
 REQUIRED_CREATION_FIELDS = ['course_uuid', 'reason', 'mode']
 
 
-class EntitlementSupportView(viewsets.ModelViewSet):
+class EntitlementSupportView(View):
+    """
+    View for viewing and changing learner enrollments, used by the
+    support team.
+    """
+    @method_decorator(require_support_permission)
+    def get(self, request):
+        """Render the enrollment support tool view."""
+        context = {
+            'username': request.GET.get('user', ''),
+            'uses_bootstrap': True
+        }
+    
+        return render_to_response('support/entitlement.html', context)
+
+class EntitlementSupportListView(viewsets.ModelViewSet):
     """
     Allows viewing and changing learner course entitlements, used the support team.
     """
