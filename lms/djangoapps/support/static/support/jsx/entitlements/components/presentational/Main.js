@@ -4,12 +4,11 @@ import SearchContainer from '../container/SearchContainer';
 import EntitlementModalContainer from '../container/ModalContainer'
 
 class Main extends React.Component{
-	openCreationModal(){
-		console.log('create new entitlement')
-		this.props.openEntitlementCreationModal()
-	}
 	constructor(props){
 		super(props);
+	}
+	openCreationModal(){
+		this.props.openEntitlementCreationModal()
 	}
 	render(){
 		return(
