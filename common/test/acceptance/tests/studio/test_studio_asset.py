@@ -192,6 +192,6 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         # Upload the files
         self.asset_page.upload_new_file(file_names)
         # Assert that the files have been uploaded.
-        all_assets = self.asset_page.asset_files_count - 1 # currently -1 because this counts header row too
+        all_assets = self.asset_page.asset_files_count
         self.assertEqual(all_assets, 4)
         self.assertEqual(file_names[::-1], self.asset_page.asset_files_names)

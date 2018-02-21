@@ -123,31 +123,30 @@ class AssetIndexPageStudioFrontend(CoursePage):
         Returns:
             list: Uploaded files.
         """
-        return self.q(css='.table-responsive tbody tr td:nth-child(2)').text
+        return self.q(css='span[data-identifier="asset-file-name"]').text
 
     @property
     def asset_files_count(self):
         """
         Returns the count of files uploaded.
         """
-        return len(self.q(css='.table-responsive tr').execute())
+        return len(self.q(css='span[data-identifier="asset-file-name"]').execute())
 
     @property
     def asset_delete_buttons(self):
         """Return a list of WebElements for deleting the assets"""
-        css = '.table-responsive tbody tr .fa-trash'
+        css = 'button[data-identifier="asset-delete-button"]'
         return self.q(css=css).execute()
 
-    @property
     def asset_lock_buttons(self, locked_only=True):
         """
         Return a list of WebElements of the lock buttons for assets
         or an empty list if there are none.
         """
         if locked_only:
-            css = ".table-responsive tbody tr td:nth-child(7) button.fa-lock"
+            css = 'button[data-identifier="asset-lock-button"].fa-lock'
         else:
-            css = ".table-responsive tbody tr td:nth-child(7) button"
+            css = 'button[data-identifier="asset-lock-button"]'
         return self.q(css=css).execute()
 
     @wait_for_js
@@ -272,7 +271,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
     def confirm_asset_deletion(self):
         """ Click to confirm deletion and sync on the notification"""
         confirmation_title_selector = '.modal'
-        self.q(css='.modal button.btn-primary').click()
+        self.q(css='.modal button[data-identifier="asset-confirm-delete-button"]').click()
         # Click initiates an ajax call, waiting for it to complete
         self.wait_for_ajax()
         sync_on_notification(self)
@@ -312,6 +311,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         file_input_css = 'input[type="file"]'
 
         for file_name in file_names:
+            self.q(css=file_input_css).results[0].clear()
             self.q(css=file_input_css).results[0].send_keys(
                 UPLOAD_FILE_DIR + file_name)
         
