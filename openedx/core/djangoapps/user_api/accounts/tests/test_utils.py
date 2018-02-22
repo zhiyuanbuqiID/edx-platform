@@ -6,14 +6,14 @@ import ddt
 from django.test import TestCase
 from django.test.utils import override_settings
 
-from lms.djangoapps.completion.test_utils import CompletionWaffleTestMixin
+from completion import models, waffle
+from completion.test_utils import CompletionWaffleTestMixin
 from openedx.core.djangoapps.user_api.accounts.utils import retrieve_last_sitewide_block_completed
 from openedx.core.djangolib.testing.utils import skip_unless_lms
 from student.models import CourseEnrollment
 from student.tests.factories import UserFactory
 from xmodule.modulestore.tests.django_utils import SharedModuleStoreTestCase
 from xmodule.modulestore.tests.factories import CourseFactory, ItemFactory
-from lms.djangoapps.completion import models, waffle
 
 from ..utils import format_social_link, validate_social_link
 

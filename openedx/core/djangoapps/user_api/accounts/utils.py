@@ -9,12 +9,11 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext as _
 from six import text_type
 
-from lms.djangoapps.completion.models import BlockCompletion
-from lms.djangoapps.completion.waffle import visual_progress_enabled
+from completion.models import BlockCompletion
+from completion.waffle import visual_progress_enabled
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
+from openedx.core.djangoapps.theming.helpers import get_config_value_from_site_or_settings, get_current_site
 from xmodule.modulestore.django import modulestore
-from openedx.core.djangoapps.theming.helpers import get_current_site, get_config_value_from_site_or_settings
-from opaque_keys.edx.keys import CourseKey
 
 
 def validate_social_link(platform_name, new_social_link):
