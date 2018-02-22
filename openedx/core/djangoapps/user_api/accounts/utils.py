@@ -117,16 +117,15 @@ def retrieve_last_sitewide_block_completed(username):
     else:
         userobj = username
 
-    # try:
-    latest_completions_by_course = BlockCompletion.latest_blocks_completed_all_courses(userobj)
-
-    # except AttributeError:
-    #     return
+    try:
+        latest_completions_by_course = BlockCompletion.latest_blocks_completed_all_courses(userobj)
+    except AttributeError:
+        return
 
     known_site_configs = [
         other_site_config.get_value('course_org_filter') for other_site_config in SiteConfiguration.objects.all()
         if other_site_config.get_value('course_org_filter')
-        ]
+    ]
 
     current_site_configuration = get_config_value_from_site_or_settings(
         name='course_org_filter',
