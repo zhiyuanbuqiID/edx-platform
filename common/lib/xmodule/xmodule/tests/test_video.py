@@ -679,8 +679,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
     def setUp(self):
         super(VideoExportTestCase, self).setUp()
         self.temp_dir = mkdtemp()
-        root_dir = path(self.temp_dir)
-        self.file_system = OSFS(root_dir)
+        self.file_system = OSFS(self.temp_dir)
         self.addCleanup(shutil.rmtree, self.temp_dir)
 
     @patch('xmodule.video_module.video_module.edxval_api')
@@ -722,10 +721,10 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         expected = etree.XML(xml_string, parser=parser)
         self.assertXmlEqual(expected, xml)
         mock_val_api.export_to_xml.assert_called_once_with(
-            edx_video_id,
-            unicode(self.descriptor.runtime.course_id.for_branch(None)),
+            video_id=edx_video_id,
             static_dir=EXPORT_STATIC_DIR,
-            resource_fs=self.file_system
+            resource_fs=self.file_system,
+            course_id=unicode(self.descriptor.runtime.course_id.for_branch(None)),
         )
 
     @patch('xmodule.video_module.video_module.edxval_api')

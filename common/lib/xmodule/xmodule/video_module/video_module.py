@@ -716,16 +716,15 @@ class VideoDescriptor(VideoFields, VideoTranscriptsMixin, VideoStudioViewHandler
 
         if self.edx_video_id and edxval_api:
             try:
+                # Create static dir if not created earlier.
                 resource_fs.makedirs(EXPORT_STATIC_DIR, recreate=True)
-                export_video_kwargs = {
-                    'static_dir': EXPORT_STATIC_DIR,
-                    'resource_fs': resource_fs
-                }
+
                 xml.append(
                     edxval_api.export_to_xml(
-                        self.edx_video_id,
-                        unicode(self.runtime.course_id.for_branch(None)),
-                        **export_video_kwargs
+                        video_id=self.edx_video_id,
+                        resource_fs=resource_fs,
+                        static_dir=EXPORT_STATIC_DIR,
+                        course_id=unicode(self.runtime.course_id.for_branch(None))
                     )
                 )
             except edxval_api.ValVideoNotFoundError:
