@@ -98,6 +98,9 @@ log = logging.getLogger(__name__)
 _ = lambda text: text
 
 
+EXPORT_STATIC_DIR = u'static'
+
+
 @XBlock.wants('settings', 'completion')
 class VideoModule(VideoFields, VideoTranscriptsMixin, VideoStudentViewHandlers, XModule, LicenseMixin):
     """
@@ -711,26 +714,22 @@ class VideoDescriptor(VideoFields, VideoTranscriptsMixin, VideoStudioViewHandler
                 ele.set('src', self.transcripts[transcript_language])
                 xml.append(ele)
 
-        if edxval_api:
-
-            external, video_ids = get_video_ids_info(self.edx_video_id, self.youtube_id_1_0, self.html5_sources)
-            if not external:
-                try:
-                    transcript_dir = 'static'
-                    resource_fs.makedirs(transcript_dir, recreate=True)
-                    export_video_kwargs = {
-                        'transcript_dir': transcript_dir,
-                        'resource_fs': resource_fs
-                    }
-                    xml.append(
-                        edxval_api.export_to_xml(
-                            video_ids[0],
-                            unicode(self.runtime.course_id.for_branch(None)),
-                            **export_video_kwargs
-                        )
+        if self.edx_video_id and edxval_api:
+            try:
+                resource_fs.makedirs(EXPORT_STATIC_DIR, recreate=True)
+                export_video_kwargs = {
+                    'static_dir': EXPORT_STATIC_DIR,
+                    'resource_fs': resource_fs
+                }
+                xml.append(
+                    edxval_api.export_to_xml(
+                        self.edx_video_id,
+                        unicode(self.runtime.course_id.for_branch(None)),
+                        **export_video_kwargs
                     )
-                except edxval_api.ValVideoNotFoundError:
-                    pass
+                )
+            except edxval_api.ValVideoNotFoundError:
+                pass
 
         # handle license specifically
         self.add_license_to_xml(xml)
