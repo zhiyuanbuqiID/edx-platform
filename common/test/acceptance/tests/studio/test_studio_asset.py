@@ -7,7 +7,8 @@ from common.test.acceptance.fixtures.config import ConfigModelFixture
 from common.test.acceptance.pages.studio.asset_index import AssetIndexPage, AssetIndexPageStudioFrontend
 from common.test.acceptance.tests.helpers import skip_if_browser
 from common.test.acceptance.tests.studio.base_studio_test import StudioCourseTest
-
+from path import Path
+import os
 
 class AssetIndexTest(StudioCourseTest):
 
@@ -35,7 +36,7 @@ class AssetIndexTest(StudioCourseTest):
         Make sure type filter is on the page.
         """
         self.asset_page.visit()
-        assert self.asset_page.type_filter_on_page() is True
+        assert self.asset_page.is_filter_element_on_page() is True
 
     @skip_if_browser('chrome')  # TODO Need to fix test_page_existance for this for chrome browser
     def test_filter_results(self):
@@ -77,22 +78,10 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         """
         Make sure type filter is on the page.
         """
+        import pudb; pudb.set_trace()
         self.asset_page.visit()
-        assert self.asset_page.filter_element_on_page() is True
-
-    # def test_correct_filters_exist(self):
-    #     """
-    #     Make sure type filter is on the page.
-    #     """
-    #     self.asset_page.visit()
-    #     assert self.asset_page.correct_filters__in_filter_element() is True
-    #
-    # def test_correct_filters_exist(self):
-    #     """
-    #     Make sure type filter is on the page.
-    #     """
-    #     self.asset_page.visit()
-    #     assert self.asset_page.correct_filters__in_filter_element() is True
+        import pudb; pudb.set_trace()
+        assert self.asset_page.is_filter_element_on_page() is True
 
     def test_clicking_filter_with_results(self):
         """
@@ -105,6 +94,7 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         if self.asset_page.select_type_filter(3):
             filtered_results = len(self.asset_page.return_results_set())
             assert all_results > filtered_results
+            # ADD CHECK FOR WHETHER ALL EXTENSIONS ARE IMAGE FILES
         else:
             msg = "Could not select filter"
             raise StudioApiL
@@ -120,48 +110,64 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         # select Audio
         if self.asset_page.select_type_filter(0):
             filtered_results = len(self.asset_page.return_results_set())
-            # assert self.asset_page.type_filter_header_label_visible()
             assert all_results > filtered_results
             assert filtered_results == 0
-            assert not self.asset_page.sortable_element_on_page()
-            assert not self.asset_page.table_element_on_page()
-            # TODO check for h3, h4, clear filter button
-            # import pudb; pudb.set_trace()
+            assert not self.asset_page.number_of_sortable_buttons_in_table_heading == 3
+            assert not self.asset_page.is_table_element_on_page()
+            assert self.asset_page.is_filter_element_on_page()
+            assert self.asset_page.is_upload_element_on_page()
+            assert self.asset_page.are_no_results_headings_on_page()
+            assert self.asset_page.is_no_results_clear_filter_button_on_page()
         else:
             msg = "Could not select filter"
             raise StudioApiL
 
+    def test_clicking_clear_filter(self):
+        """
+        Make sure clicking the 'Clear filter' button clears the checkbox and returns results.
+        """
+        self.asset_page.visit()
+        all_results = len(self.asset_page.return_results_set())
+        # select Audio
+        if self.asset_page.select_type_filter(0):
+            if self.asset_page.click_clear_filters_button():
+                new_results = len(self.asset_page.return_results_set())
+                assert new_results == all_results
 
-    # def test_clicking_filter_without_results(self):
-
+                assert self.asset_page.is_filter_element_on_page()
+                assert self.asset_page.is_upload_element_on_page()
+                assert self.asset_page.number_of_sortable_buttons_in_table_heading == 3
+                assert self.asset_page.is_table_element_on_page()
+        else:
+            msg = "Could not select filter"
+            raise StudioApiL
 
     def test_upload_element_exists(self):
         """
         Make sure upload dropzone is on the page.
         """
         self.asset_page.visit()
-        assert self.asset_page.is_upload_element_on_page() is True
+        assert self.asset_page.is_upload_element_on_page()
 
-    def test_sortable_table_element_exists(self):
+    def test_correct_number_sortable_table_elements(self):
         """
-        Make sure sortable table headings are on the page.
         """
         self.asset_page.visit()
-        assert self.asset_page.sortable_element_on_page() is True
+        assert self.asset_page.number_of_sortable_buttons_in_table_heading == 3
 
     def test_status_element_exists(self):
         """
         Make sure status alert is on the page but not visible.
         """
         self.asset_page.visit()
-        assert self.asset_page.status_alert_element_on_page() is True
+        assert self.asset_page.is_status_alert_element_on_page()
 
     def test_pagination_element_exists(self):
         """
         Make sure pagination element is on the page.
         """
         self.asset_page.visit()
-        assert self.asset_page.pagination_element_on_page() is True
+        assert self.asset_page.is_pagination_element_on_page() is True
 
     def test_lock(self):
         """
@@ -195,3 +201,71 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         all_assets = self.asset_page.asset_files_count
         self.assertEqual(all_assets, 4)
         self.assertEqual(file_names[::-1], self.asset_page.asset_files_names)
+
+    def test_display_name_sort(self):
+        self.asset_page.visit()
+        # the default sort is on 'Date Added', so sort on 'Name' to start
+        # with a fresh state
+        self.asset_page.click_sort_button('Name')
+        pre_sort_file_names = self.asset_page.asset_files_names
+
+        if self.asset_page.click_sort_button('Name'):
+            post_sort_file_names = self.asset_page.asset_files_names
+            assert pre_sort_file_names != post_sort_file_names
+
+class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
+    def setUp(self, is_staff=False):
+        super(AssetIndexTestStudioFrontendPagination, self).setUp()
+        self.asset_page = AssetIndexPageStudioFrontend(
+            self.browser,
+            self.course_info['org'],
+            self.course_info['number'],
+            self.course_info['run']
+        )
+
+    def populate_course_fixture(self, course_fixture):
+        """
+        Populate the children of the test course fixture.
+        """
+        ConfigModelFixture('/config/assets', {'enabled_for_all_courses': True, 'enabled': True}, 'cms').install()
+        files = []
+        UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
+        for file_name in os.listdir(UPLOAD_FILE_DIR):
+            file_path = 'studio-uploads/' + file_name
+            files.append(file_path)
+        course_fixture.add_asset(files)
+
+    def test_pagination_page_click(self):
+        self.asset_page.visit()
+        assert self.asset_page.number_of_pagination_page_buttons == 2
+        assert self.asset_page.is_selected_page(0)
+
+        first_page_file_names = self.asset_page.asset_files_names
+
+        if self.asset_page.click_pagination_page_button(1):
+            assert self.asset_page.is_selected_page(1)
+            assert self.asset_page.asset_files_count == 1
+            second_page_file_names = self.asset_page.asset_files_names
+
+            assert first_page_file_names != second_page_file_names
+
+    def test_pagination_next_and_previous_click(self):
+        self.asset_page.visit()
+        assert self.asset_page.number_of_pagination_page_buttons == 2
+        assert self.asset_page.is_selected_page(0)
+
+        first_page_file_names = self.asset_page.asset_files_names
+
+        assert self.asset_page.click_pagination_next_button()
+        assert self.asset_page.is_selected_page(1)
+        assert self.asset_page.asset_files_count == 1
+        next_page_file_names = self.asset_page.asset_files_names
+
+        assert first_page_file_names != next_page_file_names
+
+        assert self.asset_page.click_pagination_previous_button()
+        assert self.asset_page.is_selected_page(0)
+        assert self.asset_page.asset_files_count == 50
+        previous_page_file_names = self.asset_page.asset_files_names
+
+        assert first_page_file_names == previous_page_file_names

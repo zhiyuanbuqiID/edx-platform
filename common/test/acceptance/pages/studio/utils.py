@@ -2,6 +2,7 @@
 Utility methods useful for Studio page tests.
 """
 import os
+from path import Path
 
 from bok_choy.javascript import js_defined
 from bok_choy.promise import EmptyPromise
