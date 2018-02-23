@@ -459,8 +459,11 @@ def _get_urls_for_resume_buttons(user, enrollments):
     # Throws UnavailableCompletionData
     resume_button_urls = []
     for enrollment in enrollments:
-        block_key = get_key_to_last_completed_course_block(user, enrollment)
-        urlToBlock = reverse('jump_to', kwargs={'course_id': enrollment.course_id, 'location': block_key})
+        try:
+            block_key = get_key_to_last_completed_course_block(user, enrollment)
+            urlToBlock = reverse('jump_to', kwargs={'course_id': enrollment.course_id, 'location': block_key})
+        except (UnavailableCompletionData, RuntimeError):
+            urlToBlock = ''
         resume_button_urls.append(urlToBlock)
     return resume_button_urls
 
@@ -720,7 +723,6 @@ def student_dashboard(request):
             enr for enr in course_enrollments if entitlement.enrollment_course_run.course_id != enr.course_id
         ]
 
-
     context = {
         'urls': urls,
         'programs_data': programs_data,
@@ -773,17 +775,12 @@ def student_dashboard(request):
             'ecommerce_payment_page': ecommerce_service.payment_page_url(),
         })
 
-    # Gather urls for resume buttons in course cards.
-    try:
-        resume_button_urls = _get_urls_for_resume_buttons(user, course_enrollments + course_entitlements)
-        context.update({ 
-            'resume_buttons_are_available': True,
-            'resume_button_urls': resume_button_urls 
-        })
-    except (UnavailableCompletionData, RuntimeError):
-        # We throw a Runtime error when the completion waffle flag is on.
-        context.update({ 'resume_buttons_are_available': False })
-
+    # Gather urls for course card resume buttons.
+    resume_button_urls = _get_urls_for_resume_buttons(
+        user, course_enrollments + course_entitlements)
+    context.update({
+        'resume_button_urls': resume_button_urls
+    })
 
     response = render_to_response('dashboard.html', context)
     set_user_info_cookie(response, request)

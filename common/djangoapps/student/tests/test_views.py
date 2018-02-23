@@ -7,7 +7,7 @@ import unittest
 from datetime import timedelta
 
 import ddt
-from completion.test_utils import submit_completions_for_testing, CompletionWaffleTestMixin 
+from completion.test_utils import submit_completions_for_testing, CompletionWaffleTestMixin
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
@@ -607,20 +607,22 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
 
     @staticmethod
     def get_html_for_view_course_button(course_key_string, course_run_string):
-        return '<a href="/courses/{}/info" class="enter-course " data-course-key="{}">View Course<span class="sr">&nbsp;{}</span></a>'.format(
-            course_key_string, 
-            course_key_string, 
-            course_run_string
+        return '<a href="/courses/{course_key}/info" class="enter-course " data-course-key="{course_key}">View Course<span class="sr">&nbsp;{course_run}</span></a>'.format(
+            course_key=course_key_string,
+            course_run=course_run_string
         )
 
     @staticmethod
     def get_html_for_resume_course_button(course_key_string, resume_block_key_string, course_run_string):
-        return '<a href="/courses/{}/jump_to/{}" class="resume-course " data-course-key="{}">Resume Course<span class="sr">&nbsp;{}</span></a>'.format(
-            course_key_string, 
-            resume_block_key_string, 
-            course_key_string, 
-            course_run_string
+        return '<a href="/courses/{course_key}/jump_to/{url_to_block}" class="enter-course " data-course-key="{course_key}">Resume Course<span class="sr">&nbsp;{course_run}</span></a>'.format(
+            course_key=course_key_string,
+            url_to_block=resume_block_key_string,
+            course_run=course_run_string
         )
+
+    @staticmethod
+    def pull_course_run_from_course_key(course_key_string):
+        return course_key_string[-5:].replace('_', ' ')
 
     def test_view_course_appears_on_dashboard(self):
         """
@@ -628,21 +630,22 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
         display a "View Course" button.
         """
         self.override_waffle_switch(True)
-        
+
         self.course = CourseFactory.create()
         self.course_enrollment = CourseEnrollmentFactory(
-            course_id=self.course.id, 
+            course_id=self.course.id,
             user=self.user
         )
         response = self.client.get(reverse('dashboard'))
 
         course_key_string = str(self.course.id)
-        resume_block_key_string = '' # No completion data means there's no block to resume to.
-        course_run_string = course_key_string[-5:].replace('_',' ')
+        # No completion data means there's no block from which to resume.
+        resume_block_key_string = ''
+        course_run_string = self.pull_course_run_from_course_key(course_key_string)
 
         view_button_html = self.get_html_for_view_course_button(
-                course_key_string, 
-                course_run_string
+            course_key_string,
+            course_run_string
         )
         resume_button_html = self.get_html_for_resume_course_button(
             course_key_string,
@@ -668,7 +671,7 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
 
         self.course = CourseFactory.create()
         self.course_enrollment = CourseEnrollmentFactory(
-            course_id=self.course.id, 
+            course_id=self.course.id,
             user=self.user
         )
 
@@ -683,11 +686,11 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
 
         course_key_string = str(course_key)
         resume_block_key_string = str(block_keys[-1])
-        course_run_string = course_key_string[-5:].replace('_',' ')
+        course_run_string = self.pull_course_run_from_course_key(course_key_string)
 
         view_button_html = self.get_html_for_view_course_button(
-                course_key_string, 
-                course_run_string
+            course_key_string,
+            course_run_string
         )
         resume_button_html = self.get_html_for_resume_course_button(
             course_key_string,
@@ -703,6 +706,80 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
             view_button_html,
             response.content
         )
+
+    def test_courses_with_completion_data_have_resume_buttons(self):
+        '''
+        The Test creates a four-course-card dashboard. The user completes course 
+        blocks in the even-numbered course cards. The test checks that courses
+        with completion data have course cards with "Resume Course" buttons; 
+        those without have "View Course" buttons.
+
+        '''
+        self.override_waffle_switch(True)
+
+        num_course_cards = 4
+
+        html_for_view_buttons = []
+        html_for_resume_buttons = []
+
+        for i in range(num_course_cards):
+            course = CourseFactory.create()
+            course_enrollment = CourseEnrollmentFactory(
+                course_id=course.id,
+                user=self.user
+            )
+
+            course_key = course_enrollment.course_id
+            course_key_string = str(course_key)
+            last_completed_block_string = ''
+            course_run_string = self.pull_course_run_from_course_key(
+                course_key_string)
+
+            # Submit completed course blocks in even-numbered courses.
+            if i % 2 == 0:
+                block_keys = [
+                    course_key.make_usage_key('video', unicode(number))
+                    for number in xrange(5)
+                ]
+                last_completed_block_string = str(block_keys[-1])
+
+                submit_completions_for_testing(self.user, course_key, block_keys)
+
+            html_for_view_buttons.append(
+                self.get_html_for_view_course_button(
+                    course_key_string,
+                    course_run_string
+                )
+            )
+            html_for_resume_buttons.append(
+                self.get_html_for_resume_course_button(
+                    course_key_string,
+                    last_completed_block_string,
+                    course_run_string
+                )
+            )
+
+        response = self.client.get(reverse('dashboard'))
+
+        for i in range(num_course_cards):
+            expected_button = None
+            unexpected_button = None
+
+            if i % 2 == 0:
+                expected_button = html_for_resume_buttons[i]
+                unexpected_button = html_for_view_buttons[i]
+            else:
+                expected_button = html_for_view_buttons[i]
+                unexpected_button = html_for_resume_buttons[i]
+
+            self.assertIn(
+                expected_button,
+                response.content
+            )
+            self.assertNotIn(
+                unexpected_button,
+                response.content
+            )
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
