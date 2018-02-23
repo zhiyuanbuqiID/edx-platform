@@ -7,6 +7,7 @@ import unittest
 from datetime import timedelta
 
 import ddt
+from completion.test_utils import submit_completions_for_testing, CompletionWaffleTestMixin 
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.test import RequestFactory, TestCase
@@ -14,6 +15,7 @@ from django.test.utils import override_settings
 from django.utils.timezone import now
 from mock import patch
 from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import CourseKey
 
 from bulk_email.models import BulkEmailFlag
 from course_modes.models import CourseMode
@@ -241,7 +243,7 @@ class LogoutTests(TestCase):
 
 @ddt.ddt
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')
-class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin):
+class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, CompletionWaffleTestMixin):
     """
     Tests for the student dashboard.
     """
@@ -602,6 +604,105 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin):
         CourseEntitlementFactory(user=self.user)
         response = self.client.get(self.path)
         self.assertEqual(pq(response.content)(self.EMAIL_SETTINGS_ELEMENT_ID).length, 0)
+
+    @staticmethod
+    def get_html_for_view_course_button(course_key_string, course_run_string):
+        return '<a href="/courses/{}/info" class="enter-course " data-course-key="{}">View Course<span class="sr">&nbsp;{}</span></a>'.format(
+            course_key_string, 
+            course_key_string, 
+            course_run_string
+        )
+
+    @staticmethod
+    def get_html_for_resume_course_button(course_key_string, resume_block_key_string, course_run_string):
+        return '<a href="/courses/{}/jump_to/{}" class="resume-course " data-course-key="{}">Resume Course<span class="sr">&nbsp;{}</span></a>'.format(
+            course_key_string, 
+            resume_block_key_string, 
+            course_key_string, 
+            course_run_string
+        )
+
+    def test_view_course_appears_on_dashboard(self):
+        """
+        When a course doesn't have completion data, its course card should 
+        display a "View Course" button.
+        """
+        self.override_waffle_switch(True)
+        
+        self.course = CourseFactory.create()
+        self.course_enrollment = CourseEnrollmentFactory(
+            course_id=self.course.id, 
+            user=self.user
+        )
+        response = self.client.get(reverse('dashboard'))
+
+        course_key_string = str(self.course.id)
+        resume_block_key_string = '' # No completion data means there's no block to resume to.
+        course_run_string = course_key_string[-5:].replace('_',' ')
+
+        view_button_html = self.get_html_for_view_course_button(
+                course_key_string, 
+                course_run_string
+        )
+        resume_button_html = self.get_html_for_resume_course_button(
+            course_key_string,
+            resume_block_key_string,
+            course_run_string
+        )
+
+        self.assertIn(
+            view_button_html,
+            response.content
+        )
+        self.assertNotIn(
+            resume_button_html,
+            response.content
+        )
+
+    def test_resume_course_appears_on_dashboard(self):
+        """
+        When a course has completion data, its course card should display a 
+        "Resume Course" button.
+        """
+        self.override_waffle_switch(True)
+
+        self.course = CourseFactory.create()
+        self.course_enrollment = CourseEnrollmentFactory(
+            course_id=self.course.id, 
+            user=self.user
+        )
+
+        course_key = self.course_enrollment.course_id
+        block_keys = [
+            course_key.make_usage_key('video', unicode(number))
+            for number in xrange(5)
+        ]
+
+        submit_completions_for_testing(self.user, course_key, block_keys)
+        response = self.client.get(reverse('dashboard'))
+
+        course_key_string = str(course_key)
+        resume_block_key_string = str(block_keys[-1])
+        course_run_string = course_key_string[-5:].replace('_',' ')
+
+        view_button_html = self.get_html_for_view_course_button(
+                course_key_string, 
+                course_run_string
+        )
+        resume_button_html = self.get_html_for_resume_course_button(
+            course_key_string,
+            resume_block_key_string,
+            course_run_string
+        )
+
+        self.assertIn(
+            resume_button_html,
+            response.content
+        )
+        self.assertNotIn(
+            view_button_html,
+            response.content
+        )
 
 
 @unittest.skipUnless(settings.ROOT_URLCONF == 'lms.urls', 'Test only valid in lms')

@@ -6,6 +6,7 @@ import datetime
 import logging
 from collections import defaultdict
 
+from completion.utilities import get_key_to_last_completed_course_block, UnavailableCompletionData
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -13,6 +14,7 @@ from django.core.urlresolvers import NoReverseMatch, reverse, reverse_lazy
 from django.shortcuts import redirect
 from django.utils.translation import ugettext as _
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+
 from opaque_keys.edx.keys import CourseKey
 from pytz import UTC
 from six import text_type, iteritems
@@ -453,6 +455,16 @@ def _credit_statuses(user, course_enrollments):
     return statuses
 
 
+def _get_urls_for_resume_buttons(user, enrollments):
+    # Throws UnavailableCompletionData
+    resume_button_urls = []
+    for enrollment in enrollments:
+        block_key = get_key_to_last_completed_course_block(user, enrollment)
+        urlToBlock = reverse('jump_to', kwargs={'course_id': enrollment.course_id, 'location': block_key})
+        resume_button_urls.append(urlToBlock)
+    return resume_button_urls
+
+
 @login_required
 @ensure_csrf_cookie
 def student_dashboard(request):
@@ -473,6 +485,7 @@ def student_dashboard(request):
         return redirect(reverse('account_settings'))
 
     platform_name = configuration_helpers.get_value("platform_name", settings.PLATFORM_NAME)
+
     enable_verified_certificates = configuration_helpers.get_value(
         'ENABLE_VERIFIED_CERTIFICATES',
         settings.FEATURES.get('ENABLE_VERIFIED_CERTIFICATES')
@@ -707,6 +720,7 @@ def student_dashboard(request):
             enr for enr in course_enrollments if entitlement.enrollment_course_run.course_id != enr.course_id
         ]
 
+
     context = {
         'urls': urls,
         'programs_data': programs_data,
@@ -758,6 +772,18 @@ def student_dashboard(request):
             'use_ecommerce_payment_flow': True,
             'ecommerce_payment_page': ecommerce_service.payment_page_url(),
         })
+
+    # Gather urls for resume buttons in course cards.
+    try:
+        resume_button_urls = _get_urls_for_resume_buttons(user, course_enrollments + course_entitlements)
+        context.update({ 
+            'resume_buttons_are_available': True,
+            'resume_button_urls': resume_button_urls 
+        })
+    except (UnavailableCompletionData, RuntimeError):
+        # We throw a Runtime error when the completion waffle flag is on.
+        context.update({ 'resume_buttons_are_available': False })
+
 
     response = render_to_response('dashboard.html', context)
     set_user_info_cookie(response, request)
