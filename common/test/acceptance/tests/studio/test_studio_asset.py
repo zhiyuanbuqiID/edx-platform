@@ -28,6 +28,7 @@ class AssetIndexTest(StudioCourseTest):
         """
         Populate the children of the test course fixture.
         """
+        ConfigModelFixture('/config/assets', {'enabled_for_all_courses': False, 'enabled': False}, 'cms').install()
         self.course_fixture.add_asset(['image.jpg', 'textbook.pdf'])
 
     @skip_if_browser('chrome')  # TODO Need to fix test_page_existance for this for chrome browser
@@ -36,7 +37,7 @@ class AssetIndexTest(StudioCourseTest):
         Make sure type filter is on the page.
         """
         self.asset_page.visit()
-        assert self.asset_page.is_filter_element_on_page() is True
+        assert self.asset_page.type_filter_on_page() is True
 
     @skip_if_browser('chrome')  # TODO Need to fix test_page_existance for this for chrome browser
     def test_filter_results(self):
@@ -200,7 +201,7 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         # Assert that the files have been uploaded.
         all_assets = self.asset_page.asset_files_count
         self.assertEqual(all_assets, 4)
-        self.assertEqual(file_names[::-1], self.asset_page.asset_files_names)
+        self.assertEqual(file_names.sort(), self.asset_page.asset_files_names.sort())
 
     def test_display_name_sort(self):
         self.asset_page.visit()
