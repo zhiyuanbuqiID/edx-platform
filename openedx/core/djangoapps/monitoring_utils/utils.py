@@ -48,10 +48,18 @@ BACK_REFS_DEPTH = 8
 # Max number of objects per type to use as starting points in the reference graphs
 MAX_OBJECTS_PER_TYPE = 10
 
-# Object type names for which graphs should not be generated even if the new
-# object count is high.  "set" is ignored by default because many sets are
-# created in the course of tracking the number of new objects of each type.
-IGNORED_TYPES = ('set',)
+# Object type names for which table rows and graphs should not be generated if
+# the new object count is below the given threshold.  "set" is ignored by
+# default because many sets are created in the course of tracking the number
+# of new objects of each type.  "ApdexStats", "SplitResult", and "TimeStats"
+# are New Relic data which sometimes outlives the duration of the request but
+# usually doesn't stick around long-term.
+IGNORE_THRESHOLDS = {
+    'ApdexStats': 10,
+    'SplitResult': 50,
+    'TimeStats': 500,
+    'set': 10000,
+}
 
 WAFFLE_NAMESPACE = 'monitoring_utils'
 
@@ -65,7 +73,7 @@ def show_memory_leaks(
         refs_depth=REFS_DEPTH,
         back_refs_depth=BACK_REFS_DEPTH,
         max_objects_per_type=MAX_OBJECTS_PER_TYPE,
-        ignored_types=IGNORED_TYPES,
+        ignore_thresholds=None,
         graph_directory_path=GRAPH_DIRECTORY_PATH,
         memory_table_buffer=None,
         skip_first_graphs=True):
@@ -88,8 +96,9 @@ def show_memory_leaks(
         back_refs_depth (int): Maximum depth of backward reference graphs
         max_objects_per_type (int): Max number of objects per type to use as
             starting points in the reference graphs
-        ignored_types (iterable): Object type names for which graphs should
-            not be generated even if the new object count is high.
+        ignore_thresholds (dict): Object type names for which table rows and
+            graphs should not be generated if the new object count is below
+            the corresponding number.
         graph_directory_path (unicode): The directory in which graph files
             will be created.  It will be created if it doesn't already exist.
         memory_table_buffer (StringIO): Storage for the generated table of
@@ -100,9 +109,12 @@ def show_memory_leaks(
             The first call to a given block of code often initializes an
             assortment of objects which aren't really leaked memory.
     """
+    if ignore_thresholds is None:
+        ignore_thresholds = IGNORE_THRESHOLDS
     if memory_table_buffer is None:
         memory_table_buffer = StringIO()
-    new_ids = get_new_ids(limit=max_console_rows, output=memory_table_buffer)
+    new_ids = get_new_ids(limit=max_console_rows, ignore_thresholds=ignore_thresholds,
+                          output=memory_table_buffer)
     memory_table_text = memory_table_buffer.getvalue()
     log.info('\n' + memory_table_text)
 
@@ -125,7 +137,7 @@ def show_memory_leaks(
     for item in sorted_by_count:
         type_name = item[0]
         object_ids = new_ids[type_name]
-        if type_name in ignored_types or not object_ids:
+        if not object_ids:
             continue
         objects = at_addrs(list(object_ids)[:max_objects_per_type])
         data['type_name'] = type_name
@@ -148,6 +160,8 @@ def show_memory_leaks(
 class MemoryUsageData(object):
     """
     Memory analysis data and configuration options for the current request.
+    Do *NOT* use this in production; it slows down most requests by about an
+    order of magnitude, even the ones which aren't being specifically studied.
 
     Call ``MemoryUsageData.analyze()`` from a view and enable the appropriate
     waffle switch(es) to start generating memory leak diagnostic information:
@@ -163,6 +177,14 @@ class MemoryUsageData(object):
     When using this in development via Django's runserver command, be sure to
     pass it the ``--nothreading`` option to avoid concurrent memory changes
     while serving static assets.  In devstack, do this in docker-compose.yml.
+
+    To use this feature on a sandbox, you also need to append
+    ``openedx.core.djangoapps.monitoring_utils.apps.MonitoringUtilsConfig`` to
+    the end of the ``INSTALLED_APPS`` Django setting.  This is present by
+    default for devstack and load test environments, but absent from the
+    ``aws`` settings module to avoid a little overhead at the start of each
+    request even when the Waffle switches are disabled (mainly just to load
+    the switch from the database).
 
     Configuration options for the depth of the graphs, how many leaked
     objects of each type to graph, and so forth are currently set as constants
@@ -280,7 +302,8 @@ class WSGIServer(DjangoWSGIServer):
 # provide good hooks for customizing this operation
 
 def get_new_ids(skip_update=False, limit=10, sortby='deltas',  # pylint: disable=dangerous-default-value
-                shortnames=None, output=None, _state={}):
+                shortnames=None, ignore_thresholds=IGNORE_THRESHOLDS,
+                output=None, _state={}):
     """Find and display new objects allocated since last call.
 
     Shows the increase in object counts since last call to this
@@ -337,11 +360,9 @@ def get_new_ids(skip_update=False, limit=10, sortby='deltas',  # pylint: disable
         >>> b in new_lists
         True
     """
-    if not _state:
-        _state['old'] = defaultdict(set)
-        _state['current'] = defaultdict(set)
-        _state['new'] = defaultdict(set)
-        _state['shortnames'] = True
+    if ignore_thresholds is None:
+        ignore_thresholds = IGNORE_THRESHOLDS
+    _initialize_state(_state)
     new_ids = _state['new']
     if skip_update:
         return new_ids
@@ -382,8 +403,8 @@ def get_new_ids(skip_update=False, limit=10, sortby='deltas',  # pylint: disable
         new_ids[class_name].update(new_ids_set)
         num_new = len(new_ids_set)
         num_delta = num_current - num_old
-        if num_delta < 1:
-            # ignore types whose overall count didn't increase
+        if num_delta < 1 or (class_name in ignore_thresholds and num_current < ignore_thresholds[class_name]):
+            # ignore types with no net increase or whose overall count isn't large enough to worry us
             if class_name in new_ids:
                 del new_ids[class_name]
             continue
@@ -399,6 +420,17 @@ def get_new_ids(skip_update=False, limit=10, sortby='deltas',  # pylint: disable
               reverse=True)
     _show_results(rows, limit, output)
     return new_ids
+
+
+def _initialize_state(state):
+    """
+    Initialize the object ID tracking data if it hasn't been done yet.
+    """
+    if not state:
+        state['old'] = defaultdict(set)
+        state['current'] = defaultdict(set)
+        state['new'] = defaultdict(set)
+        state['shortnames'] = True
 
 
 def _show_results(rows, limit, output):
@@ -424,9 +456,9 @@ def _show_no_leaks_message(output):
     Print a message, indicating that no memory leaks were found, to the given
     output stream.
     """
-    print('='*51, file=output)
+    print('=' * 51, file=output)
     print('No object types increased their net count in memory', file=output)
-    print('='*51, file=output)
+    print('=' * 51, file=output)
 
 
 def _show_leaks_table(rows, limit, output):
@@ -436,12 +468,12 @@ def _show_leaks_table(rows, limit, output):
     if limit is not None:
         rows = rows[:limit]
     width = max(len(row[0]) for row in rows)
-    print('='*(width+13*4), file=output)
+    print('=' * (width + 13 * 4), file=output)
     print('%-*s%13s%13s%13s%13s' %
           (width, 'Type', 'Old_ids', 'Current_ids', 'New_ids', 'Count_Deltas'),
           file=output)
-    print('='*(width+13*4), file=output)
+    print('=' * (width + 13 * 4), file=output)
     for row_class, old, current, new, delta in rows:
         print('%-*s%13d%13d%+13d%+13d' %
               (width, row_class, old, current, new, delta), file=output)
-    print('='*(width+13*4), file=output)
+    print('=' * (width + 13 * 4), file=output)
