@@ -99,7 +99,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
     """
 
     pagination_page_element = ".pagination li"
-    pagination_disabled_element = ".pagination .disabled .page-link"
     table_sort_buttons = 'th.sortable button.btn-header'
     type_filter_element = ".filter-set .form-group"
     url_path = "assets"
@@ -126,9 +125,18 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         Get the names of uploaded files.
         Returns:
-            list: Uploaded files.
+            list: Names of files on current page.
         """
         return self.q(css='span[data-identifier="asset-file-name"]').text
+
+    @property
+    def asset_files_types(self):
+        """
+        Get the file types of uploaded files.
+        Returns:
+            list: File types of files on current page.
+        """
+        return self.q(css='span[data-identifier="asset-content-type"]').text
 
     @property
     def asset_files_count(self):
@@ -177,14 +185,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='.drop-zone').present
 
-    # @wait_for_js
-    # def get_filter_element_on_page(self):
-    #     return self.q(css='.filter-set .form-group').execute()
-
-    #
-    # Should we add an id value to the div surrounding the assets filters?
-    # self.q(css='div[@role = group]').present
-    #
     @wait_for_js
     def is_filter_element_on_page(self):
         """
@@ -198,24 +198,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
     @property
     def number_of_filters(self):
         return len(self.q(css='.form-check').execute())
-
-    @wait_for_js
-    def correct_filters_in_filter_element(self):
-        """
-        """
-        correct_filters = [u'Audio', u'Code', u'Document', u'Image', u'Other']
-        filters = self.q(css='.form-check').execute()
-        return all([filter.text in correct_filters for filter in filters])
-
-    #
-    # next two items validate clicking the dropdown and selecting from the dropdown
-    #
-    # @wait_for_js
-    # def click_type_filter(self):
-    #     """
-    #     Clicks type filter Images checkbox.
-    #     """
-    #     self.q(css=".asInput__form-check-input #Images").click()
 
     @wait_for_js
     def select_type_filter(self, filter_number):
@@ -245,22 +227,10 @@ class AssetIndexPageStudioFrontend(CoursePage):
             return True
         return False
 
-    # @wait_for_js
-    # def are_sortable_elements_on_page(self):
-    #     """
-    #     Checks that the table headings are sortable.
-    #     how to check for all 3? should we?
-    #     """
-    #     return self.q(css='th.sortable').is_present()
-
     @property
     @wait_for_js
     def number_of_sortable_buttons_in_table_heading(self):
         return len(self.q(css=self.table_sort_buttons).execute())
-
-    # @wait_for_js
-    # def are_sortable_elements_on_page(self):
-    #     return self.q(css='th.sortable').execute()
 
     @wait_for_js
     def is_status_alert_element_on_page(self):
@@ -372,40 +342,20 @@ class AssetIndexPageStudioFrontend(CoursePage):
 
         self.wait_for_element_visibility(
             '.alert', 'Upload status alert is visible.')
-    #
-    # def upload_all_studio_uploads_files(self):
-    #     """
-    #     Upload all file(s) under /data/uploads/studio-uploads and wait for them to upload.
-    #     """
-    #     # file path found from CourseFixture logic
-    #     UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
-    #     # Make file input field visible.
-    #     file_input_css = 'input[type="file"]'
-    #
-    #     for file_name in os.listdir(UPLOAD_FILE_DIR):
-    #         self.q(css=file_input_css).results[0].clear()
-    #         self.q(css=file_input_css).results[0].send_keys(
-    #             UPLOAD_FILE_DIR + file_name)
-    #     # import pudb; pudb.set_trace()
-    #     ready_promise = EmptyPromise(
-    #         lambda: self.asset_files_count == 50 and self.number_of_pagination_page_buttons == 2,
-    #         "Files finished uploading"
-    #         ).fulfill()
-
-    def return_results_set(self):
-        """
-        Return the asset set from the page
-        """
-        return self.q(css=".table-responsive tr").results
+        self.wait_for_ajax()
+        self.wait_for_page()
 
     def is_previous_button_disabled(self):
-        # return self.q(css=self.pagination_disabled_element).first.present
-        return 'disabled' in self.q(css='.pagination li').first.attrs('class')[0];
+        return 'disabled' in self.q(css=self.pagination_page_element).first.attrs('class')[0]
 
     def is_next_button_disabled(self):
-        # return self.q(css=self.pagination_disabled_element).nth(1).present
-        return 'disabled' in self.q(css='.pagination li').nth(self.number_of_pagination_buttons-1).attrs('class')[0];
+        return 'disabled' in self.q(css=self.pagination_page_element + ' span').nth(self.number_of_pagination_buttons-1).attrs('class')[0]
 
+    def is_previous_button_on_page(self):
+        return 'previous' in self.q(css=self.pagination_page_element + ' span').first.text
+
+    def is_next_button_on_page(self):
+        return 'next' in self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons-1).text
 
     def click_pagination_page_button(self, index):
         """
@@ -437,7 +387,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         Return False if previous button disabled.
         """
         self.wait_for_ajax()
-        # import pudb; pudb.set_trace()
         if not self.is_previous_button_disabled():
             self.q(css=self.pagination_page_element).first.click()
             self.wait_for_ajax()
@@ -456,7 +405,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         Return the number of total pagination page buttons, including previous, pages, and next buttons.
         """
-        import pudb; pudb.set_trace()
         return len(self.q(css=self.pagination_page_element))
 
     def is_selected_page(self, index):
@@ -475,7 +423,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
     def click_sort_button(self, button_text):
         """
         """
-        # import pudb; pudb.set_trace()
         self.wait_for_ajax()
         sort_button = self.q(css=self.table_sort_buttons).filter(
             lambda el: button_text in el.text
