@@ -10,6 +10,7 @@ from common.test.acceptance.tests.studio.base_studio_test import StudioCourseTes
 import os
 from path import Path
 
+
 class AssetIndexTest(StudioCourseTest):
     """
     Tests for the Asset index page.
@@ -53,6 +54,7 @@ class AssetIndexTest(StudioCourseTest):
         else:
             msg = "Could not open select Type filter"
             raise StudioApiLoginError(msg)
+
 
 class AssetIndexTestStudioFrontend(StudioCourseTest):
     """Tests for the Asset index page."""
@@ -134,10 +136,10 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         the filtering correctly.
         """
         self.asset_page.visit()
-        all_results = self.asset_page.asset_files_count
+        all_results = self.asset_page.number_of_asset_files
         # select Images
         assert self.asset_page.select_type_filter(3)
-        filtered_results = self.asset_page.asset_files_count
+        filtered_results = self.asset_page.number_of_asset_files
         assert all_results > filtered_results
         assets_file_types = self.asset_page.asset_files_types
         for file_type in assets_file_types:
@@ -150,10 +152,10 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         view, and displays the correct elements.
         """
         self.asset_page.visit()
-        all_results = self.asset_page.asset_files_count
+        all_results = self.asset_page.number_of_asset_files
         # select Audio
         assert self.asset_page.select_type_filter(0)
-        filtered_results = self.asset_page.asset_files_count
+        filtered_results = self.asset_page.number_of_asset_files
         assert all_results > filtered_results
         assert filtered_results == 0
         self.assert_page_without_filter_results_elements_load()
@@ -164,11 +166,11 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         returns results.
         """
         self.asset_page.visit()
-        all_results = self.asset_page.asset_files_count
+        all_results = self.asset_page.number_of_asset_files
         # select Audio
         assert self.asset_page.select_type_filter(0)
         assert self.asset_page.click_clear_filters_button()
-        new_results = self.asset_page.asset_files_count
+        new_results = self.asset_page.number_of_asset_files
         assert new_results == all_results
         self.test_page_with_assets_elements_load()
 
@@ -199,7 +201,7 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         # Upload the files
         self.asset_page.upload_new_file(file_names)
         # Assert that the files have been uploaded.
-        all_assets = self.asset_page.asset_files_count
+        all_assets = self.asset_page.number_of_asset_files
         self.assertEqual(all_assets, 4)
         self.assertEqual(file_names.sort(), self.asset_page.asset_files_names.sort())
 
@@ -264,7 +266,7 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
 
         assert self.asset_page.click_pagination_page_button(1)
         assert self.asset_page.is_selected_page(1)
-        assert self.asset_page.asset_files_count == 1
+        assert self.asset_page.number_of_asset_files == 1
         second_page_file_names = self.asset_page.asset_files_names
 
         assert first_page_file_names != second_page_file_names
@@ -280,14 +282,14 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
 
         assert self.asset_page.click_pagination_next_button()
         assert self.asset_page.is_selected_page(1)
-        assert self.asset_page.asset_files_count == 1
+        assert self.asset_page.number_of_asset_files == 1
         next_page_file_names = self.asset_page.asset_files_names
 
         assert first_page_file_names != next_page_file_names
 
         assert self.asset_page.click_pagination_previous_button()
         assert self.asset_page.is_selected_page(0)
-        assert self.asset_page.asset_files_count == 50
+        assert self.asset_page.number_of_asset_files == 50
         previous_page_file_names = self.asset_page.asset_files_names
 
         assert first_page_file_names == previous_page_file_names
