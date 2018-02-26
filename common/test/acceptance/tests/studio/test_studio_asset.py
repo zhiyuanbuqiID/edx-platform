@@ -239,7 +239,8 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):  # pylint: disab
         ConfigModelFixture('/config/assets', {'enabled_for_all_courses': True, 'enabled': True}, 'cms').install()
         files = []
         UPLOAD_FILE_DIR = Path(self.__file__).abspath().dirname().dirname().dirname().dirname()
-            + '/data/uploads/studio-uploads/'
+        + '/data/uploads/studio-uploads/'
+
         for file_name in os.listdir(UPLOAD_FILE_DIR):
             file_path = 'studio-uploads/' + file_name
             files.append(file_path)

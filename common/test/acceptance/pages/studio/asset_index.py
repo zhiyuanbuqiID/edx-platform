@@ -309,7 +309,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             file_names (list): file name(s) we want to upload.
         """
         # file path found from CourseFixture logic
-        UPLOAD_FILE_DIR = Path(s__file__).abspath().dirname().dirname().dirname().dirname()
+        UPLOAD_FILE_DIR = Path(self.__file__).abspath().dirname().dirname().dirname().dirname()
         + '/data/uploads/studio-uploads/'
         # Make file input field visible.
         file_input_css = 'input[type="file"]'
