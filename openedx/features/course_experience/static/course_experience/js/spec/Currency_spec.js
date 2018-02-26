@@ -11,7 +11,7 @@ describe('Currency factory', () => {
 
   beforeEach(() => {
     loadFixtures('course_experience/fixtures/course-currency-fragment.html');
-    currency = new Currency(true);
+    currency = new Currency();
     canadaPosition = {
       coords: {
         latitude: 58.773884,

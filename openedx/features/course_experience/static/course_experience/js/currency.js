@@ -72,15 +72,4 @@ export class Currency {  // eslint-disable-line import/prefer-default-export
     }.bind(this);
     $(document).ready(caller);
   }
-
-  getUserLocation() {
-    // Get user location from browser
-    navigator.geolocation.getCurrentPosition(this.getCountryCaller.bind(this));
-  }
-
-  constructor(skipInitialize) {
-    if (!skipInitialize) {
-      this.getUserLocation();
-    }
-  }
 }
