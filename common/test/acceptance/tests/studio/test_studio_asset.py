@@ -15,7 +15,6 @@ class AssetIndexTest(StudioCourseTest):
     Tests for the Asset index page.
     """
 
-
     def setUp(self, is_staff=False):
         super(AssetIndexTest, self).setUp()
         self.asset_page = AssetIndexPage(
@@ -32,7 +31,6 @@ class AssetIndexTest(StudioCourseTest):
         ConfigModelFixture('/config/assets', {'enabled_for_all_courses': False, 'enabled': False}, 'cms').install()
         self.course_fixture.add_asset(['image.jpg', 'textbook.pdf'])
 
-
     @skip_if_browser('chrome')  # TODO Need to fix test_page_existance for this for chrome browser
     def test_type_filter_exists(self):
         """
@@ -40,7 +38,6 @@ class AssetIndexTest(StudioCourseTest):
         """
         self.asset_page.visit()
         assert self.asset_page.type_filter_on_page() is True
-
 
     @skip_if_browser('chrome')  # TODO Need to fix test_page_existance for this for chrome browser
     def test_filter_results(self):
@@ -58,10 +55,7 @@ class AssetIndexTest(StudioCourseTest):
             raise StudioApiLoginError(msg)
 
 class AssetIndexTestStudioFrontend(StudioCourseTest):
-    """
-    Tests for the Asset index page.
-    """
-
+    """Tests for the Asset index page."""
 
     def setUp(self, is_staff=False):
         super(AssetIndexTestStudioFrontend, self).setUp()
@@ -72,19 +66,13 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
             self.course_info['run']
         )
 
-
     def populate_course_fixture(self, course_fixture):
-        """
-        Populate the children of the test course fixture.
-        """
+        """Populate the children of the test course fixture."""
         ConfigModelFixture('/config/assets', {'enabled_for_all_courses': True, 'enabled': True}, 'cms').install()
         self.course_fixture.add_asset(['image.jpg', 'textbook.pdf'])
 
-
     def test_page_with_assets_elements_load(self):
-        """
-        Make sure all elements are on page for a course with assets.
-        """
+        """Make sure all elements are on page for a course with assets."""
         self.asset_page.visit()
         assert self.assert_table_exists()
         assert self.assert_type_filter_exists()
@@ -93,11 +81,8 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         assert self.assert_status_element_exists()
         assert self.assert_pagination_element_exists()
 
-
     def assert_page_without_filter_results_elements_load(self):
-        """
-        Make sure correct elements are on page for a filter with no results.
-        """
+        """Make sure correct elements are on page for a filter with no results."""
         assert not self.assert_table_exists()
         assert not self.assert_sortable_table_heading_elements_exist()
         assert not self.assert_pagination_element_exists()
@@ -108,27 +93,17 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         assert self.assert_no_results_headings_exist()
         assert self.assert_clear_filters_button_exists()
 
-
     def assert_table_exists(self):
-        """
-        Make sure table is on the page.
-        """
+        """Make sure table is on the page."""
         return self.asset_page.is_table_element_on_page()
 
-
     def assert_type_filter_exists(self):
-        """
-        Make sure type filter is on the page.
-        """
+        """Make sure type filter is on the page."""
         return self.asset_page.is_filter_element_on_page() is True
 
-
     def assert_upload_element_exists(self):
-        """
-        Make sure upload dropzone is on the page.
-        """
+        """Make sure upload dropzone is on the page."""
         return self.asset_page.is_upload_element_on_page()
-
 
     def assert_sortable_table_heading_elements_exist(self):
         """
@@ -137,34 +112,21 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         """
         return self.asset_page.number_of_sortable_buttons_in_table_heading == 3
 
-
     def assert_status_element_exists(self):
-        """
-        Make sure status alert is on the page but not visible.
-        """
+        """Make sure status alert is on the page but not visible."""
         return self.asset_page.is_status_alert_element_on_page()
 
-
     def assert_pagination_element_exists(self):
-        """
-        Make sure pagination element is on the page.
-        """
+        """Make sure pagination element is on the page."""
         return self.asset_page.is_pagination_element_on_page() is True
 
-
     def assert_no_results_headings_exist(self):
-        """
-        Make sure headings with text for no results is on the page.
-        """
+        """Make sure headings with text for no results is on the page."""
         return self.asset_page.are_no_results_headings_on_page()
 
-
     def assert_clear_filters_button_exists(self):
-        """
-        Make sure the clear filters button is on the page.
-        """
+        """Make sure the clear filters button is on the page."""
         return self.asset_page.is_no_results_clear_filter_button_on_page()
-
 
     def test_clicking_filter_with_results(self):
         """
@@ -181,7 +143,6 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         for file_type in assets_file_types:
             assert 'image' in file_type
 
-
     def test_clicking_filter_without_results(self):
         """
         Make sure clicking a type filter that has no results performs the
@@ -197,7 +158,6 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         assert filtered_results == 0
         self.assert_page_without_filter_results_elements_load()
 
-
     def test_clicking_clear_filter(self):
         """
         Make sure clicking the 'Clear filter' button clears the checkbox and
@@ -212,11 +172,8 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         assert new_results == all_results
         self.test_page_with_assets_elements_load()
 
-
     def test_lock(self):
-        """
-        Make sure clicking the lock button toggles correctly.
-        """
+        """Make sure clicking the lock button toggles correctly."""
         self.asset_page.visit()
         # Verify that a file can be locked
         self.asset_page.set_asset_lock()
@@ -230,7 +187,6 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         self.assertEqual(len(all_assets), 2)
         self.assertTrue('fa-lock' in all_assets[0].get_attribute('class'))
         self.assertTrue('fa-unlock' in all_assets[1].get_attribute('class'))
-
 
     def test_delete_and_upload(self):
         """
@@ -247,11 +203,8 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         self.assertEqual(all_assets, 4)
         self.assertEqual(file_names.sort(), self.asset_page.asset_files_names.sort())
 
-
     def test_display_name_sort(self):
-        """
-        Make sure clicking the display name sort button sorts the files.
-        """
+        """Make sure clicking the display name sort button sorts the files."""
         self.asset_page.visit()
         # the default sort is on 'Date Added', so sort on 'Name' to start
         # with a fresh state
@@ -269,8 +222,6 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
 
 
 class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
-
-
     def setUp(self, is_staff=False):
         super(AssetIndexTestStudioFrontendPagination, self).setUp()
         self.asset_page = AssetIndexPageStudioFrontend(
@@ -280,11 +231,8 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
             self.course_info['run']
         )
 
-
     def populate_course_fixture(self, course_fixture):
-        """
-        Populate the children of the test course fixture and upload 49 files.
-        """
+        """Populate the children of the test course fixture and upload 49 files."""
         ConfigModelFixture('/config/assets', {'enabled_for_all_courses': True, 'enabled': True}, 'cms').install()
         files = []
         UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
@@ -293,35 +241,23 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
             files.append(file_path)
         course_fixture.add_asset(files)
 
-
     def assert_correct_number_of_page_buttons(self, count):
-        """
-        Make sure the correct number of page buttons are on the page.
-        """
+        """Make sure the correct number of page buttons are on the page."""
         assert self.asset_page.number_of_pagination_page_buttons == count
 
-
     def assert_correct_direction_buttons(self):
-        """
-        Make sure the previous and next pagination buttons are on the page.
-        """
+        """Make sure the previous and next pagination buttons are on the page."""
         assert self.asset_page.is_previous_button_on_page()
         assert self.asset_page.is_next_button_on_page()
 
-
     def test_pagination_exists(self):
-        """
-        Make sure the pagination elements are on the page.
-        """
+        """Make sure the pagination elements are on the page."""
         self.asset_page.visit()
         self.assert_correct_number_of_page_buttons(2)
         self.assert_correct_direction_buttons()
 
-
     def test_pagination_page_click(self):
-        """
-        Make clicking the second page button displays the second page of files.
-        """
+        """Make clicking the second page button displays the second page of files."""
         self.asset_page.visit()
 
         first_page_file_names = self.asset_page.asset_files_names
@@ -332,7 +268,6 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
         second_page_file_names = self.asset_page.asset_files_names
 
         assert first_page_file_names != second_page_file_names
-
 
     def test_pagination_next_and_previous_click(self):
         """
