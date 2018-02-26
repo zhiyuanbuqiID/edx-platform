@@ -463,7 +463,7 @@ def _get_urls_for_resume_buttons(user, enrollments):
         try:
             block_key = get_key_to_last_completed_course_block(user, enrollment)
             urlToBlock = reverse('jump_to', kwargs={'course_id': enrollment.course_id, 'location': block_key})
-        except (UnavailableCompletionData, RuntimeError):
+        except UnavailableCompletionData:
             urlToBlock = ''
         resume_button_urls.append(urlToBlock)
     return resume_button_urls
