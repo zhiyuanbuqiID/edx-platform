@@ -28,7 +28,6 @@ from django.test.utils import override_settings
 from fs.osfs import OSFS
 from opaque_keys.edx.locator import CourseLocator
 from opaque_keys.edx.keys import CourseKey
-from path import Path as path
 from tempfile import mkdtemp
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
@@ -758,7 +757,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         self.descriptor.html5_sources = ['http://www.example.com/source.mp4', 'http://www.example.com/source.ogg']
         self.descriptor.download_video = True
 
-        xml = self.descriptor.definition_to_xml(None)
+        xml = self.descriptor.definition_to_xml(self.file_system)
         parser = etree.XMLParser(remove_blank_text=True)
         xml_string = '''\
          <video url_name="SampleProblem" start_time="0:00:05" youtube="0.75:izygArpw-Qo,1.00:p2Q6BrNhdh8,1.25:1EeWXzPdhSA,1.50:rABDYkeK0x8" show_captions="false" download_video="true" download_track="true">
@@ -775,7 +774,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         """
         Test XML export with defaults.
         """
-        xml = self.descriptor.definition_to_xml(None)
+        xml = self.descriptor.definition_to_xml(self.file_system)
         # Check that download_video field is also set to default (False) in xml for backward compatibility
         expected = '<video url_name="SampleProblem" download_video="false"/>\n'
         self.assertEquals(expected, etree.tostring(xml, pretty_print=True))
@@ -786,7 +785,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         Test XML export with transcripts being overridden to None.
         """
         self.descriptor.transcripts = None
-        xml = self.descriptor.definition_to_xml(None)
+        xml = self.descriptor.definition_to_xml(self.file_system)
         expected = '<video url_name="SampleProblem" download_video="false"/>\n'
         self.assertEquals(expected, etree.tostring(xml, pretty_print=True))
 
@@ -797,7 +796,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         The illegal characters in a String field are removed from the string instead.
         """
         self.descriptor.display_name = 'Display\x1eName'
-        xml = self.descriptor.definition_to_xml(None)
+        xml = self.descriptor.definition_to_xml(self.file_system)
         self.assertEqual(xml.get('display_name'), 'DisplayName')
 
     @patch('xmodule.video_module.video_module.edxval_api', None)
@@ -806,7 +805,7 @@ class VideoExportTestCase(VideoDescriptorTestBase):
         Test XML export handles the unicode characters.
         """
         self.descriptor.display_name = u'这是文'
-        xml = self.descriptor.definition_to_xml(None)
+        xml = self.descriptor.definition_to_xml(self.file_system)
         self.assertEqual(xml.get('display_name'), u'\u8fd9\u662f\u6587')
 
 
