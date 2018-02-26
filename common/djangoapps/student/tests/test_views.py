@@ -3,6 +3,7 @@ Test the student dashboard view.
 """
 import itertools
 import json
+import re
 import unittest
 from datetime import timedelta
 
@@ -622,7 +623,10 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
 
     @staticmethod
     def pull_course_run_from_course_key(course_key_string):
-        return course_key_string[-5:].replace('_', ' ')
+        search_results = re.search(r'Run_[0-9]+$', course_key_string)
+        assert(search_results)
+        course_run_string = search_results.group(0).replace('_', ' ')
+        return course_run_string
 
     def test_view_course_appears_on_dashboard(self):
         """
@@ -717,6 +721,8 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
         '''
         self.override_waffle_switch(True)
 
+        isEven = lambda n: n % 2 == 0
+
         num_course_cards = 4
 
         html_for_view_buttons = []
@@ -736,7 +742,7 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
                 course_key_string)
 
             # Submit completed course blocks in even-numbered courses.
-            if i % 2 == 0:
+            if isEven(i):
                 block_keys = [
                     course_key.make_usage_key('video', unicode(number))
                     for number in xrange(5)
@@ -765,7 +771,7 @@ class StudentDashboardTests(SharedModuleStoreTestCase, MilestonesTestCaseMixin, 
             expected_button = None
             unexpected_button = None
 
-            if i % 2 == 0:
+            if isEven(i):
                 expected_button = html_for_resume_buttons[i]
                 unexpected_button = html_for_view_buttons[i]
             else:
