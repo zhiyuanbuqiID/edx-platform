@@ -4,6 +4,7 @@ Debugging python-in-mako is terrible, so we've moved the actual code out to its 
 """
 from django.conf import settings
 
+
 def load_sfe_i18n_messages(locale):
     """
     Loads i18n data from studio-frontend's published files.
