@@ -516,7 +516,6 @@ class TestCourseOutlineResumeCourse(SharedModuleStoreTestCase, CompletionWaffleT
         CourseEnrollment.get_enrollment(self.user, course.id).delete()
         response = self.visit_course_home(course, start_count=1, resume_count=0)
         content = pq(response.content)
-        #
         self.assertTrue(content('.action-resume-course').attr('href').endswith('/course/' + course.url_name))
 
 
