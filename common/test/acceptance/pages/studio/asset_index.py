@@ -17,6 +17,7 @@ from common.test.acceptance.pages.studio.course_page import CoursePage
 
 class AssetIndexPage(CoursePage):
 
+
     """
     The Files and Uploads page for a course in Studio
     """
@@ -93,10 +94,10 @@ class AssetIndexPage(CoursePage):
         return self.q(css="#asset-table-body tr").results
 
 class AssetIndexPageStudioFrontend(CoursePage):
-
     """
     The Files and Uploads page for a course in Studio
     """
+
 
     pagination_page_element = ".pagination li"
     table_sort_buttons = 'th.sortable button.btn-header'
@@ -120,6 +121,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         url = "/".join([BASE_URL, self.url_path, urllib.quote_plus(unicode(course_key))])
         return url if url[-1] is '/' else url + '/'
 
+
     @property
     def asset_files_names(self):
         """
@@ -128,6 +130,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             list: Names of files on current page.
         """
         return self.q(css='span[data-identifier="asset-file-name"]').text
+
 
     @property
     def asset_files_types(self):
@@ -138,6 +141,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='span[data-identifier="asset-content-type"]').text
 
+
     @property
     def asset_files_count(self):
         """
@@ -145,11 +149,13 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return len(self.q(css='span[data-identifier="asset-file-name"]').execute())
 
+
     @property
     def asset_delete_buttons(self):
         """Return a list of WebElements for deleting the assets"""
         css = 'button[data-identifier="asset-delete-button"]'
         return self.q(css=css).execute()
+
 
     def asset_lock_buttons(self, locked_only=True):
         """
@@ -162,6 +168,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             css = 'button[data-identifier="asset-lock-button"]'
         return self.q(css=css).execute()
 
+
     @wait_for_js
     def is_browser_on_page(self):
         return all([
@@ -171,6 +178,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             not self.q(css='div.ui-loading').visible,
         ])
 
+
     @wait_for_js
     def is_sfe_container_on_page(self):
         """
@@ -178,12 +186,14 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='.SFE__container').present
 
+
     @wait_for_js
     def is_upload_element_on_page(self):
         """
         Checks that the dropzone area is on the page.
         """
         return self.q(css='.drop-zone').present
+
 
     @wait_for_js
     def is_filter_element_on_page(self):
@@ -195,9 +205,11 @@ class AssetIndexPageStudioFrontend(CoursePage):
             self.q(css=self.type_filter_element).present,
         ])
 
+
     @property
     def number_of_filters(self):
         return len(self.q(css='.form-check').execute())
+
 
     @wait_for_js
     def select_type_filter(self, filter_number):
@@ -211,6 +223,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             self.wait_for_ajax()
             return True
         return False
+
 
     @wait_for_js
     def click_clear_filters_button(self):
@@ -227,10 +240,12 @@ class AssetIndexPageStudioFrontend(CoursePage):
             return True
         return False
 
+
     @property
     @wait_for_js
     def number_of_sortable_buttons_in_table_heading(self):
         return len(self.q(css=self.table_sort_buttons).execute())
+
 
     @wait_for_js
     def is_status_alert_element_on_page(self):
@@ -242,6 +257,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             not self.q(css='.alert').visible,
         ])
 
+
     @wait_for_js
     def is_pagination_element_on_page(self):
         """
@@ -249,12 +265,14 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return self.q(css='.pagination').present
 
+
     @wait_for_js
     def is_table_element_on_page(self):
         """
         Checks that table is on the page.
         """
         return self.q(css='table.table-responsive').present
+
 
     @wait_for_js
     def are_no_results_headings_on_page(self):
@@ -270,6 +288,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             ).present,
         ])
 
+
     @wait_for_js
     def is_no_results_clear_filter_button_on_page(self):
         """
@@ -278,6 +297,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         return self.q(css='.SFE-wrapper button.btn').filter(
             lambda el: el.text == 'Clear filter'
         ).present
+
 
     def set_asset_lock(self, index=0):
         """
@@ -291,6 +311,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         self.wait_for_ajax()
         sync_on_notification(self)
 
+
     def confirm_asset_deletion(self):
         """ Click to confirm deletion and sync on the notification"""
         confirmation_title_selector = '.modal'
@@ -299,10 +320,12 @@ class AssetIndexPageStudioFrontend(CoursePage):
         self.wait_for_ajax()
         sync_on_notification(self)
 
+
     def delete_first_asset(self):
         """ Deletes file then clicks delete on confirmation """
         self.q(css='.fa-trash').first.click()
         self.confirm_asset_deletion()
+
 
     def delete_asset_named(self, name):
         """ Delete the asset with the specified name. """
@@ -315,12 +338,13 @@ class AssetIndexPageStudioFrontend(CoursePage):
         assets.get(name).click()
         self.confirm_asset_deletion()
 
+
     def delete_all_assets(self):
         """ Delete all uploaded assets """
         while self.asset_files_count:
             self.delete_first_asset()
-
             # add promise?
+
 
     def upload_new_file(self, file_names):
         """
@@ -349,13 +373,13 @@ class AssetIndexPageStudioFrontend(CoursePage):
         return 'disabled' in self.q(css=self.pagination_page_element).first.attrs('class')[0]
 
     def is_next_button_disabled(self):
-        return 'disabled' in self.q(css=self.pagination_page_element + ' span').nth(self.number_of_pagination_buttons-1).attrs('class')[0]
+        return 'disabled' in self.q(css=self.pagination_page_element + ' span').nth(self.number_of_pagination_buttons - 1).attrs('class')[0]
 
     def is_previous_button_on_page(self):
         return 'previous' in self.q(css=self.pagination_page_element + ' span').first.text
 
     def is_next_button_on_page(self):
-        return 'next' in self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons-1).text
+        return 'next' in self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons - 1).text
 
     def click_pagination_page_button(self, index):
         """
@@ -369,6 +393,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             return True
         return False
 
+
     def click_pagination_next_button(self):
         """
         Click pagination next button.
@@ -376,10 +401,11 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         self.wait_for_ajax()
         if not self.is_next_button_disabled():
-            self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons-1).click()
+            self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons - 1).click()
             self.wait_for_ajax()
             return True
         return False
+
 
     def click_pagination_previous_button(self):
         """
@@ -393,6 +419,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             return True
         return False
 
+
     @property
     def number_of_pagination_page_buttons(self):
         """
@@ -400,12 +427,14 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         return len(self.q(css=self.pagination_page_element + '.page-item'))
 
+
     @property
     def number_of_pagination_buttons(self):
         """
         Return the number of total pagination page buttons, including previous, pages, and next buttons.
         """
         return len(self.q(css=self.pagination_page_element))
+
 
     def is_selected_page(self, index):
         """
@@ -419,6 +448,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         if index < self.number_of_pagination_page_buttons:
             return 'active' in self.q(css=self.pagination_page_element + '.page-item').nth(index).attrs('class')[0]
         return False
+
 
     def click_sort_button(self, button_text):
         """
