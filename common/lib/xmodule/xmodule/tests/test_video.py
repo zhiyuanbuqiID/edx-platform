@@ -18,6 +18,7 @@ import datetime
 import shutil
 from uuid import uuid4
 
+from tempfile import mkdtemp
 from lxml import etree
 from mock import ANY, Mock, patch, MagicMock
 import ddt
@@ -28,7 +29,6 @@ from django.test.utils import override_settings
 from fs.osfs import OSFS
 from opaque_keys.edx.locator import CourseLocator
 from opaque_keys.edx.keys import CourseKey
-from tempfile import mkdtemp
 from xblock.field_data import DictFieldData
 from xblock.fields import ScopeIds
 

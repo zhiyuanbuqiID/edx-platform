@@ -13,6 +13,7 @@ from django.core.files.base import ContentFile
 from django.test import TestCase
 from django.test.utils import override_settings
 from fs.osfs import OSFS
+from fs.path import combine
 from edxval.api import (
     ValCannotCreateError,
     ValVideoNotFoundError,
@@ -23,11 +24,11 @@ from edxval.api import (
     get_video_transcript,
     get_video_transcript_data
 )
+from tempfile import mkdtemp
 from lxml import etree
 from mock import MagicMock, Mock, patch
 from nose.plugins.attrib import attr
 from path import Path as path
-from tempfile import mkdtemp
 
 from xmodule.contentstore.content import StaticContent
 from xmodule.exceptions import NotFoundError
@@ -1572,7 +1573,7 @@ class VideoDescriptorTest(TestCase, VideoDescriptorTestBase):
         """
         language_code = 'ar'
         transcript_file_name = 'test_edx_video_id-ar.srt'
-        expected_transcript_path = self.temp_dir + EXPORT_STATIC_PATH + '/' + transcript_file_name
+        expected_transcript_path = combine(self.temp_dir, combine(EXPORT_STATIC_PATH, transcript_file_name))
         self.descriptor.edx_video_id = 'test_edx_video_id'
 
         create_profile('mobile')
