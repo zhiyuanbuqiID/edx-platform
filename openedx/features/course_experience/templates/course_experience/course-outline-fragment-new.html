@@ -16,7 +16,7 @@ from openedx.core.djangolib.markup import HTML, Text
     % if blocks.get('children'):
         <ol class="block-tree accordion" role="presentation">
             % for section in blocks.get('children'):
-                <% section_is_auto_opened = section.get('resume_block') is True %>
+                <% section_is_auto_opened = section == resume_block %>
                 <li
                     class="outline-item section"
                     role="heading"

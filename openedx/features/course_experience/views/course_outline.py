@@ -34,6 +34,7 @@ class CourseOutlineFragmentView(EdxFragmentView):
         course_overview = get_course_overview_with_access(request.user, 'load', course_key, check_if_enrolled=True)
 
         course_block_tree = get_course_outline_block_tree(request, course_id)
+        resume_block = get_resume_block(course_block_tree)
         if not course_block_tree:
             return None
 
@@ -45,18 +46,17 @@ class CourseOutlineFragmentView(EdxFragmentView):
             'csrf': csrf(request)['csrf_token'],
             'course': course_overview,
             'blocks': course_block_tree,
-            'show_visual_progress': show_visual_progress
+            'show_visual_progress': show_visual_progress,
+            'resume_block': resume_block
         }
 
         # TODO: EDUCATOR-2283 Remove this check when the waffle flag is turned on in production
         if course_experience_waffle.new_course_outline_enabled(course_key=course_key):
             xblock_display_names = self.create_xblock_id_and_name_dict(course_block_tree)
             gated_content = self.get_content_milestones(request, course_key)
-            user_has_no_completion_data = get_resume_block(course_block_tree)
 
             context['gated_content'] = gated_content
             context['xblock_display_names'] = xblock_display_names
-            context['user_has_no_completion_data'] = user_has_no_completion_data is None
 
             # TODO: EDUCATOR-2283 Rename this file to course-outline-fragment.html
             html = render_to_string('course_experience/course-outline-fragment-new.html', context)
