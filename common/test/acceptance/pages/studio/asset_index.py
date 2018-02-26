@@ -7,9 +7,8 @@ from path import Path
 import urllib
 
 from bok_choy.javascript import wait_for_js
-from bok_choy.promise import EmptyPromise
 from opaque_keys.edx.locator import CourseLocator
-from common.test.acceptance.pages.common.utils import click_css, sync_on_notification
+from common.test.acceptance.pages.common.utils import sync_on_notification
 from common.test.acceptance.pages.studio import BASE_URL
 from common.test.acceptance.pages.studio.course_page import CoursePage
 
@@ -111,7 +110,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
             deprecated=(default_store == 'draft')
         )
         url = "/".join([BASE_URL, self.url_path, urllib.quote_plus(unicode(course_key))])
-        return url if url[-1] is '/' else url + '/'
+        return url if url[-1] == '/' else url + '/'
 
     @wait_for_js
     def is_browser_on_page(self):
@@ -206,14 +205,6 @@ class AssetIndexPageStudioFrontend(CoursePage):
     def number_of_filters(self):
         return len(self.q(css='.form-check').execute())
 
-    @wait_for_js
-    def is_status_alert_element_on_page(self):
-        """Checks that status alert is hidden on page."""
-        return all([
-            self.q(css='.alert').present,
-            not self.q(css='.alert').visible,
-        ])
-
     @property
     @wait_for_js
     def number_of_sortable_buttons_in_table_heading(self):
@@ -279,7 +270,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
     def confirm_asset_deletion(self):
         """ Click to confirm deletion and sync on the notification."""
         confirmation_title_selector = '.modal'
-        self.q(css='.modal button[data-identifier="asset-confirm-delete-button"]').click()
+        self.q(css=confirmation_title_selector + 'button[data-identifier="asset-confirm-delete-button"]').click()
         # Click initiates an ajax call, waiting for it to complete
         self.wait_for_ajax()
         sync_on_notification(self)
@@ -295,7 +286,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         if name not in names:
             raise LookupError('Asset with filename {} not found.'.format(name))
         delete_buttons = self.asset_delete_buttons
-        assets = dict(zip(names, asset_delete_buttons))
+        assets = dict(zip(names, delete_buttons))
         # Now click the link in that row
         assets.get(name).click()
         self.confirm_asset_deletion()
@@ -308,6 +299,7 @@ class AssetIndexPageStudioFrontend(CoursePage):
         self.wait_for_ajax()
         self.wait_for_page()
 
+    @wait_for_js
     def upload_new_file(self, file_names):
         """
         Upload file(s).
@@ -317,7 +309,8 @@ class AssetIndexPageStudioFrontend(CoursePage):
             file_names (list): file name(s) we want to upload.
         """
         # file path found from CourseFixture logic
-        UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
+        UPLOAD_FILE_DIR = Path(s__file__).abspath().dirname().dirname().dirname().dirname()
+            + '/data/uploads/studio-uploads/'
         # Make file input field visible.
         file_input_css = 'input[type="file"]'
 
@@ -335,13 +328,15 @@ class AssetIndexPageStudioFrontend(CoursePage):
         return 'disabled' in self.q(css=self.pagination_page_element).first.attrs('class')[0]
 
     def is_next_button_disabled(self):
-        return 'disabled' in self.q(css=self.pagination_page_element + ' span').nth(self.number_of_pagination_buttons - 1).attrs('class')[0]
+        return 'disabled' in self.q(css=self.pagination_page_element + ' span')
+            .nth(self.number_of_pagination_buttons - 1).attrs('class')[0]
 
     def is_previous_button_on_page(self):
         return 'previous' in self.q(css=self.pagination_page_element + ' span').first.text
 
     def is_next_button_on_page(self):
-        return 'next' in self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons - 1).text
+        return 'next' in self.q(css=self.pagination_page_element)
+            .nth(self.number_of_pagination_buttons - 1).text
 
     def click_pagination_page_button(self, index):
         """
@@ -362,7 +357,8 @@ class AssetIndexPageStudioFrontend(CoursePage):
         """
         self.wait_for_ajax()
         if not self.is_next_button_disabled():
-            self.q(css=self.pagination_page_element).nth(self.number_of_pagination_buttons - 1).click()
+            self.q(css=self.pagination_page_element)
+                .nth(self.number_of_pagination_buttons - 1).click()
             self.wait_for_ajax()
             return True
         return False
@@ -399,7 +395,8 @@ class AssetIndexPageStudioFrontend(CoursePage):
         Note: 0-indexed
         """
         if index < self.number_of_pagination_page_buttons:
-            return 'active' in self.q(css=self.pagination_page_element + '.page-item').nth(index).attrs('class')[0]
+            return 'active' in self.q(css=self.pagination_page_element + '.page-item')
+                .nth(index).attrs('class')[0]
         return False
 
     def click_sort_button(self, button_text):

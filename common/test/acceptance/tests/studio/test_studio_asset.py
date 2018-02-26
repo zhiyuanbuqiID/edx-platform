@@ -1,14 +1,14 @@
 """
 Acceptance tests for Studio related to the asset index page.
 """
+import os
+from path import Path
 
 from common.test.acceptance.fixtures.base import StudioApiLoginError
 from common.test.acceptance.fixtures.config import ConfigModelFixture
 from common.test.acceptance.pages.studio.asset_index import AssetIndexPage, AssetIndexPageStudioFrontend
 from common.test.acceptance.tests.helpers import skip_if_browser
 from common.test.acceptance.tests.studio.base_studio_test import StudioCourseTest
-import os
-from path import Path
 
 
 class AssetIndexTest(StudioCourseTest):
@@ -55,8 +55,7 @@ class AssetIndexTest(StudioCourseTest):
             msg = "Could not open select Type filter"
             raise StudioApiLoginError(msg)
 
-
-class AssetIndexTestStudioFrontend(StudioCourseTest):
+class AssetIndexTestStudioFrontend(StudioCourseTest):  # pylint: disable=arguments-differ
     """Tests for the Asset index page."""
 
     def setUp(self, is_staff=False):
@@ -223,7 +222,9 @@ class AssetIndexTestStudioFrontend(StudioCourseTest):
         assert self.asset_page.asset_files_names == before_sort_file_names
 
 
-class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
+class AssetIndexTestStudioFrontendPagination(StudioCourseTest):  # pylint: disable=arguments-differ
+    """Pagination tests for the Asset index page."""
+
     def setUp(self, is_staff=False):
         super(AssetIndexTestStudioFrontendPagination, self).setUp()
         self.asset_page = AssetIndexPageStudioFrontend(
@@ -237,7 +238,8 @@ class AssetIndexTestStudioFrontendPagination(StudioCourseTest):
         """Populate the children of the test course fixture and upload 49 files."""
         ConfigModelFixture('/config/assets', {'enabled_for_all_courses': True, 'enabled': True}, 'cms').install()
         files = []
-        UPLOAD_FILE_DIR = Path(__file__).abspath().dirname().dirname().dirname().dirname() + '/data/uploads/studio-uploads/'
+        UPLOAD_FILE_DIR = Path(self.__file__).abspath().dirname().dirname().dirname().dirname()
+            + '/data/uploads/studio-uploads/'
         for file_name in os.listdir(UPLOAD_FILE_DIR):
             file_path = 'studio-uploads/' + file_name
             files.append(file_path)

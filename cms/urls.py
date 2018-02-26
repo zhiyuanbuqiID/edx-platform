@@ -5,14 +5,14 @@ from django.contrib.admin import autodiscover as django_autodiscover
 from django.utils.translation import ugettext_lazy as _
 
 import contentstore.views
+from cms.djangoapps.contentstore.views.organization import OrganizationListView
+from contentstore.config.models import NewAssetsPageFlag
 import openedx.core.djangoapps.common_views.xblock
 import openedx.core.djangoapps.debug.views
 import openedx.core.djangoapps.external_auth.views
 import openedx.core.djangoapps.lang_pref.views
 
-from cms.djangoapps.contentstore.views.organization import OrganizationListView
 from config_models.views import ConfigurationModelCurrentAPIView
-from contentstore.config.models import NewAssetsPageFlag
 from ratelimitbackend import admin
 
 django_autodiscover()
