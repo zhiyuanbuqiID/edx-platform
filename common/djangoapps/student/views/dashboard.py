@@ -6,7 +6,8 @@ import datetime
 import logging
 from collections import defaultdict
 
-from completion.utilities import get_key_to_last_completed_course_block, UnavailableCompletionData
+from completion.exceptions import UnavailableCompletionData
+from completion.utilities import get_key_to_last_completed_course_block
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
