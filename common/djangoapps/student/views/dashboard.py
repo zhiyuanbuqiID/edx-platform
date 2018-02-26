@@ -457,7 +457,6 @@ def _credit_statuses(user, course_enrollments):
 
 
 def _get_urls_for_resume_buttons(user, enrollments):
-    # Throws UnavailableCompletionData
     resume_button_urls = []
     for enrollment in enrollments:
         try:
