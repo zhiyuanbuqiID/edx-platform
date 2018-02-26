@@ -17,7 +17,7 @@ from openedx.features.course_experience import waffle as course_experience_waffl
 from completion import waffle as completion_waffle
 from student.models import CourseEnrollment
 
-from ..utils import get_course_outline_block_tree
+from ..utils import get_course_outline_block_tree, get_resume_block
 from util.milestones_helpers import get_course_content_milestones
 
 
@@ -51,11 +51,12 @@ class CourseOutlineFragmentView(EdxFragmentView):
         # TODO: EDUCATOR-2283 Remove this check when the waffle flag is turned on in production
         if course_experience_waffle.new_course_outline_enabled(course_key=course_key):
             xblock_display_names = self.create_xblock_id_and_name_dict(course_block_tree)
-
             gated_content = self.get_content_milestones(request, course_key)
+            user_has_no_completion_data = get_resume_block(course_block_tree)
 
             context['gated_content'] = gated_content
             context['xblock_display_names'] = xblock_display_names
+            context['user_has_no_completion_data'] = user_has_no_completion_data is None
 
             # TODO: EDUCATOR-2283 Rename this file to course-outline-fragment.html
             html = render_to_string('course_experience/course-outline-fragment-new.html', context)
